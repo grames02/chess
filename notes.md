@@ -12,3 +12,5 @@ Alrighty, I've been looking at the code for a couple of hours now. I'm still not
 ## What Was Accomplished Today
 
 Alrighty, I went ahead and got my slack account all configured. I feel like last time was good for better understanding the code itself. This time, I'm hoping to get some of it actually done. I went ahead and asked in Slack for clarification on the assignment requirements as well.
+
+I've been working on the 'Chess Board' file. It's been pretty interesting. I've mainly constructed the reset board function. I thought I had done it correctly, however I keep getting errors that I'm out of Range. So now I'm revisiting the instructions and am trying to see where I'm going wrong. I most likely could've been more efficient with how I setup the board, but I think it'll work nonetheless. Just gotta find where the bugs are.
