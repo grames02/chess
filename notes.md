@@ -14,3 +14,12 @@ Alrighty, I've been looking at the code for a couple of hours now. I'm still not
 Alrighty, I went ahead and got my slack account all configured. I feel like last time was good for better understanding the code itself. This time, I'm hoping to get some of it actually done. I went ahead and asked in Slack for clarification on the assignment requirements as well.
 
 I've been working on the 'Chess Board' file. It's been pretty interesting. I've mainly constructed the reset board function. I thought I had done it correctly, however I keep getting errors that I'm out of Range. So now I'm revisiting the instructions and am trying to see where I'm going wrong. I most likely could've been more efficient with how I setup the board, but I think it'll work nonetheless. Just gotta find where the bugs are.
+
+
+# 6/29/2025 - 6/30/2025
+
+## What Was Accomplished
+
+Awesome!! I went on a late night coding grind and tried to figure out why my resetboard wasn't working. I went onto Slack and saw people talking about the Hashing and Equals overrides. These were my issue! I also had the board off by one and had to implement a minus 1 into my add and get location (since they're using 0 as 1.) Anyways, I watched the video explaining how hashing and equals all worked. Interesting how it provides the address and not the actual content. It took me a little while to fully understand this, but then I went back and implemented all the steps and everything is passing!
+
+The only thing that I have left is the pieces and how they individually move. I'm following the class advice and making a piece calculator file, which I can referrence. I might work on it for a bit longer. We'll see if I get any breakthroughs.
