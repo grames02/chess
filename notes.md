@@ -35,3 +35,5 @@ Now I'm finalizing the piece movement. I deicded it'd be easier to create an in 
 I've completed the King movement pattern. Now I'll be doing the others, however I will have to implement a while loop since their movement range is greater than 1. I will base many of them off of the king though.
 
 I've accomplished all of them, EXCEPT for the pawn. I was able to use a similar format for them all. The Bishop, Rook, and Queen all involved while loops. Whereas the King and Knight only required if statements. The pawn is definitely more complex. I think I could apply an if-then scenario for it checking whether or not the diagonal spaces are being occupied. If they are, and of the other teams color then I will grant it to move there. I also still need to implement how it can move two spaces at the beginning. AND how it can be promoted (I think that needs to be a part of this deliverable anyways.)
+
+Ok, coolio! I finished it up! I figured out the easiest way to do the promotion would just be to set an integer equal to one of the promotion rows (1 or 8 depending on team) at the end. Then integrate the rest from there.
