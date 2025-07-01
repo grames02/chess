@@ -25,3 +25,11 @@ Awesome!! I went on a late night coding grind and tried to figure out why my res
 The only thing that I have left is the pieces and how they individually move. I'm following the class advice and making a piece calculator file, which I can referrence. I might work on it for a bit longer. We'll see if I get any breakthroughs.
 
 Alrighty, it's a little past 1 AM and I'm calling it. I didn't make any of the piece movement patterns yet. However, I have setup where they will be implemented and essentially made a skeleton of my ChessPieceCalculator code. I'll wrap it up in the morning.
+
+# 6/30/2025 Part 2
+
+## What Was Accomplished
+
+Now I'm finalizing the piece movement. I deicded it'd be easier to create an in bounds calculator. Then for all the pieces I can use this code to either include or exclude a position.
+
+I've completed the King movement pattern. Now I'll be doing the others, however I will have to implement a while loop since their movement range is greater than 1. I will base many of them off of the king though.
