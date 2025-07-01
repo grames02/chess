@@ -1,0 +1,32 @@
+This file is just for my notes and general thoughts while developing Chess.
+
+Ok, so first of all, I want to review the code I've already seen and ensure that I better understand it all.
+
+ChessBoard.java
+-This file is for: the board itself. It initializes the game with the proper board size. It also has the function
+for adding a piece and getting its location.
+
+ChessGame.java
+-This file is for: The game itself. A good chunk of the rules, which team is which, stalemate stuff, etc.
+
+ChessMove.java
+-This file is for: The chess pieces moving across the board. It also has the upgrade system for the pawn.
+
+ChessPiece.java
+-This file is for: All the individual pieces and their movesets
+
+ChessPosition.java
+-This file is for: Helpful function for telling us where the pieces are at.
+
+___________________
+
+Ok. So now I've reviewed some of the files. Let's think on how these can work together.
+
+I've been messing around with it, and I have some initial questions.
+
+1. How do we know what piece has been selected for a move?
+
+____________________________________
+
+Alrighty, so my next course of action is to fix the reset board function. Once this is done, I can start doing the individual pieces.
+I also should make an out of bounds function. I think having one could prove helpful for the project.

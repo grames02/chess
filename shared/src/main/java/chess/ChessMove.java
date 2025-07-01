@@ -1,5 +1,7 @@
 package chess;
 
+import java.util.Objects;
+
 /**
  * Represents moving a chess piece on a chessboard
  * <p>
@@ -8,24 +10,33 @@ package chess;
  */
 public class ChessMove {
 
-    public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
+
+    // I'll go ahead and setup my variables.
+    private ChessPosition start;
+    private ChessPosition end;
+    private ChessPiece.PieceType promotion;
+
+    public ChessMove(ChessPosition start, ChessPosition endPosition,
                      ChessPiece.PieceType promotionPiece) {
+        this.start = start;
+        this.end = endPosition;
+        this.promotion = promotionPiece;
+
+
     }
 
     /**
      * @return ChessPosition of starting location
      */
     public ChessPosition getStartPosition() {
-        // I'm going to try out using the position function.
-        return ChessPosition(startPosition);
-        throw new RuntimeException("Not implemented");
+        return this.start;
     }
 
     /**
      * @return ChessPosition of ending location
      */
     public ChessPosition getEndPosition() {
-        throw new RuntimeException("Not implemented");
+        return this.end;
     }
 
     /**
@@ -35,6 +46,22 @@ public class ChessMove {
      * @return Type of piece to promote a pawn to, or null if no promotion
      */
     public ChessPiece.PieceType getPromotionPiece() {
-        throw new RuntimeException("Not implemented");
+        return this.promotion;
+    }
+    // For a promotion piece, this is in reference to the pawns. I could use a simple if then statement for this.
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessMove chessMove = (ChessMove) o;
+        return Objects.equals(start, chessMove.start) && Objects.equals(end, chessMove.end) && promotion == chessMove.promotion;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(start, end, promotion);
     }
 }
