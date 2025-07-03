@@ -11,7 +11,7 @@ import java.util.Objects;
 public class ChessMove {
 
 
-    // I'll go ahead and setup my variables.
+    // I'll go ahead and set up my variables.
     private ChessPosition start;
     private ChessPosition end;
     private ChessPiece.PieceType promotion;
