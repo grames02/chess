@@ -28,6 +28,21 @@ public class ChessBoard {
         squares[position.getRow() - 1][position.getColumn() - 1] = piece;
     }
 
+    // Adding in a copy board method. This will allow us to validate moves in the main game file.
+    public ChessBoard copy() {
+        ChessBoard copy = new ChessBoard();
+        for (int i = 0; i <= 8; i++) {
+            for (int j = 0; j <= 8; j++) {
+                ChessPosition spot = new ChessPosition(i,j);
+                ChessPiece piece = this.getPiece(spot);
+                if (piece != null) {
+                    copy.addPiece(spot, new ChessPiece(piece.getTeamColor(), piece.getPieceType()));
+                }
+            }
+        }
+        return copy;
+    }
+
     /**
      * Gets a chess piece on the chessboard
      *
