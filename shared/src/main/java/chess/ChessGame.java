@@ -12,9 +12,11 @@ import java.util.Objects;
 public class ChessGame {
     private ChessBoard board;
     private TeamColor currentTurn;
+    private int turncounter;
 
     public ChessGame() {
         setBoard(board);
+        turncounter = 1;
         getTeamTurn();
     }
 
@@ -23,11 +25,10 @@ public class ChessGame {
      */
     public TeamColor getTeamTurn() {
         if (turncounter == 1) {
-        // White's Turn
-        turncounter = 0;
-        return TeamColor.WHITE;
-        }
-        else {
+            // White's Turn
+            turncounter = 0;
+            return TeamColor.WHITE;
+        } else {
             turncounter = 1;
             return TeamColor.BLACK;
         }
@@ -43,8 +44,7 @@ public class ChessGame {
             // White's Turn
             turncounter = 0;
             team = TeamColor.WHITE;
-        }
-        else {
+        } else {
             turncounter = 1;
             team = TeamColor.BLACK;
         }
@@ -66,7 +66,9 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        return new ChessPieceCalculator(piece, startPosition, board).piece_moveset();
+        isInCheck(currentTurn);
+        ChessPiece our_piece = board.getPiece(startPosition);
+        return new ChessPieceCalculator(our_piece, startPosition, board).piece_moveset();
 
     }
 
@@ -87,7 +89,32 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        // First off we want to look at which team we have. That value is stored within: teamColor.
+        // Afterwards. We're going to find the King and see if he is in Danger. We could look at the Valid moves.
+        // Then, we could strike off moves that'll put the King into check and return the new list of values.
+        int row = 1;
+        int col = 1;
+        ChessPosition our_king_spot = new ChessPosition(row, col);
+        ChessPiece our_eventual_king = new ChessPiece(teamColor, ChessPiece.PieceType.PAWN);
+        while (our_eventual_king.getPieceType() != ChessPiece.PieceType.KING) {
+            ChessPiece current_piece = board.getPiece(our_king_spot);
+            if (current_piece.getPieceType() == ChessPiece.PieceType.KING) {
+                our_eventual_king = new ChessPiece(teamColor, ChessPiece.PieceType.KING);
+            } else {
+                if (row == 8) {
+                    row = 1;
+                    col += 1;
+                } else {
+                    row += 1;
+                    our_king_spot = new ChessPosition(row, col);
+                }
+            }
+        }
+        //So now we have the King's position. Let's go ahead and check if the king is in danger. We could use a while loop.
+        // This time we'll check for the other team's color and then run the Valid moves function. If one of the valid moves
+        // from the opponent equals the King's position, then we know it is in check.
+
+    return true;
     }
 
     /**
@@ -128,20 +155,6 @@ public class ChessGame {
     public ChessBoard getBoard() {
         this.board = board;
         return board;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        ChessGame chessGame = (ChessGame) o;
-        return turncounter == chessGame.turncounter && Objects.equals(board, chessGame.board) && Objects.equals(piece, chessGame.piece) && Objects.equals(position, chessGame.position) && Objects.equals(team, chessGame.team);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(board, piece, position, team, turncounter);
     }
 }
 
