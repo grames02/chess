@@ -18,6 +18,7 @@ public class ChessGame {
     public ChessGame() {
         currentTurn = TeamColor.WHITE;
         ChessBoard new_board = new ChessBoard();
+        new_board.resetBoard();
         setBoard(new_board);
     }
 
@@ -62,15 +63,19 @@ public class ChessGame {
         Collection<ChessMove> approved_moves = new ArrayList<>();
 
         for (ChessMove move : moves) {
-            ChessBoard board2 = board;
+            ChessBoard board2 = board.copy();
+            ChessGame testGame = new ChessGame();
+            testGame.setBoard(board2);
+            try {
+                testGame.makeMove(move);
+                if (!testGame.isInCheck(teamColor)) {
+                    approved_moves.add(move);
+                }
+            } catch (InvalidMoveException e) {
 
-
+            }
         }
-
-        if (isInCheck(teamColor)) {
-            return null;
-        }
-        return moves;
+        return approved_moves;
     }
 
     /**
@@ -80,12 +85,77 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+
+
         ChessPosition start = move.getStartPosition();
         ChessPosition end = move.getEndPosition();
         ChessPiece piece = board.getPiece(start);
-        new ChessBoard().addPiece(end, piece);
-        new ChessBoard().addPiece(start, null);
+        TeamColor color = piece.getTeamColor();
+
+        ChessPiece enemy_piece = board.getPiece(end);
+
+//        if (enemy_piece.getTeamColor() != piece.getTeamColor()) {
+//            throw new InvalidMoveException("They are the same color.");
+//        }
+
+        if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
+            // For when pawns go diagonally and there was no enemy in the corner.
+            int valuecol1 = start.getColumn();
+            int valuecol2 = end.getColumn();
+            int column_result = valuecol2 - valuecol1;
+            if (column_result == 1 || column_result == -1) {
+                if (board.getPiece(end) == null) {
+                    throw new InvalidMoveException("No piece was in the corner. Pawn cannot move that way.");
+                }
+            }
+
+
+
+
+
+
+            // For when pawns go more than 1 and they're not at the front line.
+            if (start.getRow() != 2 && piece.getTeamColor() == TeamColor.WHITE) {
+                int value1 = start.getRow();
+                int value2 = end.getRow();
+                int result = value2 - value1;
+
+                if (result > 1) {
+                    throw new InvalidMoveException("Pawn cannot go that far");
+                }
+            }
+            else if (start.getRow() != 7 && piece.getTeamColor() == TeamColor.BLACK) {
+                int value1 = start.getRow();
+                int value2 = end.getRow();
+                int result = value2 - value1;
+
+                if (result > 1) {
+                    throw new InvalidMoveException("Pawn cannot go that far");
+                }
+            }
+
+        }
+
+        if (piece.getTeamColor() != currentTurn) {
+            throw new InvalidMoveException("Wrong team turn");
+        }
+
+        if (isInCheck(color)) {
+            throw new InvalidMoveException("Going into check!");
+        }
+
+        board.addPiece(end, piece);
+        board.addPiece(start, null);
+
+        if (move.getPromotionPiece() != null) {
+            board.addPiece(end, new ChessPiece(piece.getTeamColor(), move.getPromotionPiece()));
+        }
+
+
+
+        currentTurn = (currentTurn == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
     }
+
 
     /**
      * Determines if the given team is in check
@@ -163,7 +233,6 @@ public class ChessGame {
      */
     public void setBoard(ChessBoard board) {
         this.board = board;
-        this.board.resetBoard();
     }
 
     /**
@@ -175,4 +244,17 @@ public class ChessGame {
         return board;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessGame chessGame = (ChessGame) o;
+        return Objects.equals(board, chessGame.board) && currentTurn == chessGame.currentTurn;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(board, currentTurn);
+    }
 }
