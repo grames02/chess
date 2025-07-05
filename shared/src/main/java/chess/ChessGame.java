@@ -53,9 +53,24 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        isInCheck(currentTurn);
         ChessPiece our_piece = board.getPiece(startPosition);
-            return new ChessPieceCalculator(our_piece, startPosition, board).piece_moveset();
+        if (our_piece == null) {
+            return null;
+        }
+        Collection<ChessMove> moves = new ChessPieceCalculator(our_piece, startPosition, board).piece_moveset();
+        TeamColor teamColor = our_piece.getTeamColor();
+        Collection<ChessMove> approved_moves = new ArrayList<>();
+
+        for (ChessMove move : moves) {
+            ChessBoard board2 = board;
+
+
+        }
+
+        if (isInCheck(teamColor)) {
+            return null;
+        }
+        return moves;
     }
 
     /**
@@ -65,7 +80,11 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        ChessPosition start = move.getStartPosition();
+        ChessPosition end = move.getEndPosition();
+        ChessPiece piece = board.getPiece(start);
+        new ChessBoard().addPiece(end, piece);
+        new ChessBoard().addPiece(start, null);
     }
 
     /**
@@ -103,7 +122,7 @@ public class ChessGame {
                 ChessPosition piece_checker = new ChessPosition(i, j);
                 ChessPiece that_piece = board.getPiece(piece_checker);
                 if (that_piece != null && that_piece.getTeamColor() != teamColor) {
-                    List<ChessMove> moves = (List<ChessMove>) new ChessPieceCalculator(that_piece, piece_checker, board).piece_moveset();
+                    Collection<ChessMove> moves = new ChessPieceCalculator(that_piece, piece_checker, board).piece_moveset();
                     for (ChessMove move : moves) {
                         if (move.getEndPosition().equals(kingPosition)) {
                             return true;
