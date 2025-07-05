@@ -90,13 +90,56 @@ public class ChessGame {
         ChessPosition start = move.getStartPosition();
         ChessPosition end = move.getEndPosition();
         ChessPiece piece = board.getPiece(start);
+        if (piece == null) {
+            throw new InvalidMoveException("No piece!");
+        }
         TeamColor color = piece.getTeamColor();
 
-        ChessPiece enemy_piece = board.getPiece(end);
+        ChessPiece end_piece = board.getPiece(end);
+        if (end_piece != null) {
+            if (end_piece.getTeamColor() == piece.getTeamColor()) {
+                throw new InvalidMoveException("Same color");
+            }
+        }
 
-//        if (enemy_piece.getTeamColor() != piece.getTeamColor()) {
-//            throw new InvalidMoveException("They are the same color.");
+        // For The King.
+        if (piece.getPieceType() == ChessPiece.PieceType.KING) {
+            int startR = start.getRow();
+            int startC = start.getColumn();
+            int endR = end.getRow();
+            int endC = end.getColumn();
+            int row_difference = endR - startR;
+            int col_difference = endC - startC;
+            if (row_difference != -1 && row_difference != 1 && row_difference != 0) {
+                throw new InvalidMoveException("Too far for the King.");
+            }
+            if (col_difference != -1 && col_difference != 1 && col_difference != 0) {
+                throw new InvalidMoveException("Too far for the King.");
+            }
+        }
+
+        // Knights
+//        if (piece.getPieceType() == ChessPiece.PieceType.KNIGHT) {
+//            int startR = start.getRow();
+//            int startC = start.getColumn();
+//            int endR = end.getRow();
+//            int endC = end.getColumn();
+//            int row_difference = endR - startR;
+//            int col_difference = endC - startC;
+//            if (row_difference != 3 && row_difference != -3 && row_difference != 1 && row_difference != -1) {
+//                throw new InvalidMoveException("Too far for the Knight");
+//            }
+//            if (col_difference != 3 && col_difference != -3 && col_difference != 1 && col_difference != -1) {
+//                throw new InvalidMoveException("Too far for the Knight");
+//            }
 //        }
+
+        if (start.getRow() < 1 || start.getRow() > 8 || start.getColumn() < 1 || start.getColumn() > 8) {
+            throw new InvalidMoveException("Start area is out of bounds");
+        }
+        if (end.getRow() < 1 || end.getRow() > 8 || end.getColumn() < 1 || end.getColumn() > 8) {
+            throw new InvalidMoveException("End area is out of bounds");
+        }
 
         if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
             // For when pawns go diagonally and there was no enemy in the corner.
@@ -108,7 +151,6 @@ public class ChessGame {
                     throw new InvalidMoveException("No piece was in the corner. Pawn cannot move that way.");
                 }
             }
-
 
 
 
@@ -150,7 +192,6 @@ public class ChessGame {
         if (move.getPromotionPiece() != null) {
             board.addPiece(end, new ChessPiece(piece.getTeamColor(), move.getPromotionPiece()));
         }
-
 
 
         currentTurn = (currentTurn == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
@@ -212,7 +253,23 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        if (!isInCheck(teamColor)) {
+            return false;
+        }
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
+                ChessPosition position = new ChessPosition(i, j);
+                ChessPiece piece = board.getPiece(position);
+                if (piece != null && piece.getTeamColor() == teamColor) {
+                    Collection<ChessMove> moves = validMoves(position);
+                    if (moves != null && !moves.isEmpty()) {
+                        return false;
+                    }
+                }
+            }
+
+        }
+        return true;
     }
 
     /**
@@ -223,7 +280,23 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        if (isInCheck(teamColor)) {
+            return false;
+        }
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
+                ChessPosition position = new ChessPosition(i, j);
+                ChessPiece piece = board.getPiece(position);
+                if (piece != null && piece.getTeamColor() == teamColor) {
+                    Collection<ChessMove> moves = validMoves(position);
+                    if (moves != null && !moves.isEmpty()) {
+                        return false;
+                    }
+                }
+            }
+
+        }
+        return true;
     }
 
     /**
