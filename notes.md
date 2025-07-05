@@ -39,3 +39,9 @@ I've accomplished all of them, EXCEPT for the pawn. I was able to use a similar 
 Ok, coolio! I finished it up! I figured out the easiest way to do the promotion would just be to set an integer equal to one of the promotion rows (1 or 8 depending on team) at the end. Then integrate the rest from there.
 
 Well......... I submitted it and I think I've been using GitHub incorrectly. It says I've only done 5 commits. Granted it took me a little bit to fully figure out how to commit again. So, I need to talk to a TA.
+
+# 7/3/2025
+
+## What Was Accomplished
+
+I downloaded the Phase 1 HW and got all the test files loaded. Now I'm working on ChessGame. I'm not too deep into it, just messing around a bit. I'm also working on better understanding GitHub.
