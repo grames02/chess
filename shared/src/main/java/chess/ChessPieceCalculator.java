@@ -40,7 +40,7 @@ public class ChessPieceCalculator {
             return pawn_movement();
         }
 
-        return new ArrayList<>();
+        return null;
         // Just in case
 
     }
