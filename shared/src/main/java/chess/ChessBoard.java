@@ -31,8 +31,8 @@ public class ChessBoard {
     // Adding in a copy board method. This will allow us to validate moves in the main game file.
     public ChessBoard copy() {
         ChessBoard copy = new ChessBoard();
-        for (int i = 0; i <= 8; i++) {
-            for (int j = 0; j <= 8; j++) {
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
                 ChessPosition spot = new ChessPosition(i,j);
                 ChessPiece piece = this.getPiece(spot);
                 if (piece != null) {
