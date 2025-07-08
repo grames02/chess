@@ -152,10 +152,6 @@ public class ChessGame {
                 }
             }
 
-
-
-
-
             // For when pawns go more than 1 and they're not at the front line.
             if (start.getRow() != 2 && piece.getTeamColor() == TeamColor.WHITE) {
                 int value1 = start.getRow();
@@ -166,12 +162,31 @@ public class ChessGame {
                     throw new InvalidMoveException("Pawn cannot go that far");
                 }
             }
-            else if (start.getRow() != 7 && piece.getTeamColor() == TeamColor.BLACK) {
+
+            if (start.getRow() == 2 && piece.getTeamColor() == TeamColor.WHITE) {
                 int value1 = start.getRow();
                 int value2 = end.getRow();
                 int result = value2 - value1;
 
+                if (result > 2) {
+                    throw new InvalidMoveException("Pawn cannot go that far");
+                }
+            }
+            if (start.getRow() != 7 && piece.getTeamColor() == TeamColor.BLACK) {
+                int value1 = start.getRow();
+                int value2 = end.getRow();
+                int result = value1 - value2;
+
                 if (result > 1) {
+                    throw new InvalidMoveException("Pawn cannot go that far");
+                }
+            }
+            if (start.getRow() == 7 && piece.getTeamColor() == TeamColor.BLACK) {
+                int value1 = start.getRow();
+                int value2 = end.getRow();
+                int result = value1 - value2;
+
+                if (result > 2) {
                     throw new InvalidMoveException("Pawn cannot go that far");
                 }
             }
