@@ -1,8 +1,8 @@
 package chess;
 
+import javax.naming.directory.InvalidSearchControlsException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -59,21 +59,24 @@ public class ChessGame {
             return null;
         }
         Collection<ChessMove> moves = new ChessPieceCalculator(our_piece, startPosition, board).piece_moveset();
-        TeamColor teamColor = our_piece.getTeamColor();
         Collection<ChessMove> approved_moves = new ArrayList<>();
+
+        TeamColor teamColor = our_piece.getTeamColor();
 
         for (ChessMove move : moves) {
             ChessBoard board2 = board.copy();
+            ChessPiece moving_piece = board.getPiece(move.getStartPosition());
+
+            board2.addPiece(move.getEndPosition(), moving_piece);
+            board2.addPiece(move.getStartPosition(), null);
+            if (move.getPromotionPiece() != null) {
+                board2.addPiece(move.getEndPosition(), new ChessPiece(moving_piece.getTeamColor(), move.getPromotionPiece()));
+            }
             ChessGame testGame = new ChessGame();
             testGame.setBoard(board2);
-            try {
-                testGame.makeMove(move);
-                if (!testGame.isInCheck(teamColor)) {
+                if (!testGame.isInCheck(moving_piece.getTeamColor())) {
                     approved_moves.add(move);
                 }
-            } catch (InvalidMoveException e) {
-
-            }
         }
         return approved_moves;
     }
@@ -93,6 +96,12 @@ public class ChessGame {
         if (piece == null) {
             throw new InvalidMoveException("No piece!");
         }
+
+        Collection<ChessMove> legalMoves = validMoves(start);
+        if (!legalMoves.contains(move)) {
+            throw new InvalidMoveException("Invalid movement.");
+        }
+
         TeamColor color = piece.getTeamColor();
 
         ChessPiece end_piece = board.getPiece(end);
@@ -119,21 +128,26 @@ public class ChessGame {
         }
 
         // Knights
-//        if (piece.getPieceType() == ChessPiece.PieceType.KNIGHT) {
-//            int startR = start.getRow();
-//            int startC = start.getColumn();
-//            int endR = end.getRow();
-//            int endC = end.getColumn();
-//            int row_difference = endR - startR;
-//            int col_difference = endC - startC;
-//            if (row_difference != 3 && row_difference != -3 && row_difference != 1 && row_difference != -1) {
-//                throw new InvalidMoveException("Too far for the Knight");
-//            }
-//            if (col_difference != 3 && col_difference != -3 && col_difference != 1 && col_difference != -1) {
-//                throw new InvalidMoveException("Too far for the Knight");
-//            }
-//        }
+        if (piece.getPieceType() == ChessPiece.PieceType.KNIGHT) {
+            int startR = start.getRow();
+            int startC = start.getColumn();
+            int endR = end.getRow();
+            int endC = end.getColumn();
+            int row_difference = endR - startR;
+            int col_difference = endC - startC;
+            if (col_difference < 0) {
+                col_difference = col_difference * -1;
+            }
+            if (row_difference < 0) {
+                row_difference = row_difference * -1;
+            }
+            if (!((row_difference == 2 && col_difference == 1) || (row_difference == 1 && col_difference == 2))) {
+                throw new InvalidMoveException("Too far for the Knight");
+            }
+        }
 
+
+        // Ensuring everything is within bounds.
         if (start.getRow() < 1 || start.getRow() > 8 || start.getColumn() < 1 || start.getColumn() > 8) {
             throw new InvalidMoveException("Start area is out of bounds");
         }
@@ -141,18 +155,19 @@ public class ChessGame {
             throw new InvalidMoveException("End area is out of bounds");
         }
 
+        // Tests for Pawns
         if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
             // For when pawns go diagonally and there was no enemy in the corner.
-            int valuecol1 = start.getColumn();
-            int valuecol2 = end.getColumn();
-            int column_result = valuecol2 - valuecol1;
+            int value_column_1 = start.getColumn();
+            int value_column_2 = end.getColumn();
+            int column_result = value_column_2 - value_column_1;
             if (column_result == 1 || column_result == -1) {
                 if (board.getPiece(end) == null) {
                     throw new InvalidMoveException("No piece was in the corner. Pawn cannot move that way.");
                 }
             }
 
-            // For when pawns go more than 1 and they're not at the front line.
+            // For when pawns go more than 1, and they're not at the front line.
             if (start.getRow() != 2 && piece.getTeamColor() == TeamColor.WHITE) {
                 int value1 = start.getRow();
                 int value2 = end.getRow();
@@ -237,7 +252,7 @@ public class ChessGame {
             }
         }
         if (kingPosition == null) {
-            return false;
+            throw new IllegalStateException("No King was found");
         }
 
         // So now we have the King's position. Let's go ahead and check if the king is in danger. We'll scope out the board.
@@ -282,7 +297,6 @@ public class ChessGame {
                     }
                 }
             }
-
         }
         return true;
     }
@@ -295,7 +309,8 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        if (isInCheck(teamColor)) {
+
+        if (isInCheck(TeamColor.BLACK) || isInCheck(TeamColor.WHITE)) {
             return false;
         }
         for (int i = 1; i <= 8; i++) {
@@ -309,7 +324,6 @@ public class ChessGame {
                     }
                 }
             }
-
         }
         return true;
     }
