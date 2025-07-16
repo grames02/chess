@@ -15,7 +15,7 @@ public class CreateGameHandler {
         try {
             createGameService.createGameService();
             response.status(200);
-            return "{}";
+            return "{ \"gameID\": 1234 }";
         } catch (Exception e) {
             response.status(500);
             return "{\"message\": \"Error: (description of error)\"}";

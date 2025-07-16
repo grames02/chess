@@ -1,8 +1,14 @@
 package service;
 
-import dataaccess.DataManager;
+import dataaccess.DataAccess;
+import dataaccess.DataAccessException;
 
 public class LogoutService {
-    public LogoutService(DataManager dataAccess) {
+    private final DataAccess dataAccess;
+    public LogoutService(DataAccess dataAccess) {
+        this.dataAccess = dataAccess;
+    }
+    public void logoutService() throws DataAccessException {
+        dataAccess.logout();
     }
 }

@@ -1,13 +1,15 @@
 package service;
 
-import dataaccess.DataManager;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 
 public class CreateGameService {
-    public CreateGameService(DataManager dataAccess) {
+    private final DataAccess dataAccess;
+    public CreateGameService(DataAccess dataAccess) {
+        this.dataAccess = dataAccess;
     }
 
-    public void createGameService() {
+    public void createGameService() throws DataAccessException {
+        dataAccess.create_game();
     }
 }

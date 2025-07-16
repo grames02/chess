@@ -1,8 +1,15 @@
 package service;
 
-import dataaccess.DataManager;
+
+import dataaccess.DataAccess;
+import dataaccess.DataAccessException;
 
 public class ListGamesService {
-    public ListGamesService(DataManager dataAccess) {
+    private final DataAccess dataAccess;
+    public ListGamesService(DataAccess dataAccess) {
+        this.dataAccess = dataAccess;
+    }
+    public void listGameService() throws  DataAccessException {
+        dataAccess.get_game_list();
     }
 }

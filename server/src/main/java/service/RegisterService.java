@@ -1,8 +1,18 @@
 package service;
 
-import dataaccess.DataManager;
+
+import dataaccess.DataAccess;
+import dataaccess.DataAccessException;
 
 public class RegisterService {
-    public RegisterService(DataManager dataAccess) {
+    private final DataAccess dataAccess;
+
+    public RegisterService(DataAccess dataAccess) {
+        this.dataAccess = dataAccess;
+    }
+
+    public void registerService() throws DataAccessException {
+        dataAccess.();
+
     }
 }

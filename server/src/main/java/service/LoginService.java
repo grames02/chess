@@ -1,8 +1,14 @@
 package service;
 
-import dataaccess.DataManager;
+import dataaccess.DataAccess;
+import dataaccess.DataAccessException;
 
 public class LoginService {
-    public LoginService(DataManager dataAccess) {
+    private final DataAccess dataAccess;
+    public LoginService(DataAccess dataAccess) {
+        this.dataAccess = dataAccess;
+    }
+    public void loginService() throws DataAccessException {
+        dataAccess.login();
     }
 }
