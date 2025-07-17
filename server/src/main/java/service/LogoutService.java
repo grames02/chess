@@ -8,7 +8,14 @@ public class LogoutService {
     public LogoutService(DataAccess dataAccess) {
         this.dataAccess = dataAccess;
     }
-    public void logoutService() throws DataAccessException {
-        dataAccess.deleteAuth();
+
+    public void logoutService(String authToken) throws DataAccessException {
+        var auth = dataAccess.getAuth(authToken);
+        if (auth == null) {
+            throw new DataAccessException("Error: unauthorized");
+        }
+        else {
+            dataAccess.deleteAuth(authToken);
+        }
     }
 }

@@ -16,8 +16,8 @@ public class DataManager implements DataAccess {
         user_list.clear();
     }
 
-    public void deleteAuth() throws DataAccessException {
-        auth_codes.clear();
+    public void deleteAuth(String authToken) throws DataAccessException {
+        auth_codes.remove(authToken);
     }
 
     public void createUser(UserData user) throws DataAccessException {

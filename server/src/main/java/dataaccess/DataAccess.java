@@ -8,7 +8,7 @@ public interface DataAccess {
     // Deleting Stuff
     void clear_all() throws DataAccessException;
 
-    void deleteAuth() throws DataAccessException;
+    void deleteAuth(String authToken) throws DataAccessException;
 
     // Creation Ones
     void createUser(UserData user) throws DataAccessException;
