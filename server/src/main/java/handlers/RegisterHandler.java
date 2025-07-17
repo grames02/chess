@@ -7,6 +7,8 @@ import model.RegisterRequest;
 import model.AuthData;
 import com.google.gson.Gson;
 
+import java.util.Map;
+
 
 public class RegisterHandler {
     private final RegisterService registerService;
@@ -23,8 +25,16 @@ public class RegisterHandler {
             return gson.toJson(result);
         }
         catch (Exception e) {
-            response.status(400);
-            return gson.toJson("Error");
+            if (e.getMessage().equals("Error: bad request")) {
+                response.status(400);
+            }
+            else if (e.getMessage().equals("Error: already taken")) {
+                response.status(403);
+            }
+            else {
+                response.status(500);
+            }
+            return new Gson().toJson(Map.of("message", e.getMessage()));
         }
     }
 }

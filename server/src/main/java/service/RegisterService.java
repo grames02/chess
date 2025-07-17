@@ -21,10 +21,10 @@ public class RegisterService {
         String password = request.getPassword();
 
         if (username == null || email == null || password == null) {
-            return null;
+            throw new DataAccessException("Error: bad request");
         }
         if (dataAccess.getUser(username) != null) {
-            return null;
+            throw new DataAccessException("Error: already taken");
         }
         UserData user = new UserData(username, password, email);
         dataAccess.createUser(user);
