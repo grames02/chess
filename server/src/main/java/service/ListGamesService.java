@@ -10,6 +10,6 @@ public class ListGamesService {
         this.dataAccess = dataAccess;
     }
     public void listGameService() throws  DataAccessException {
-        dataAccess.get_game_list();
+        dataAccess.listGames();
     }
 }

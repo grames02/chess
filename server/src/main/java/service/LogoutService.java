@@ -9,6 +9,6 @@ public class LogoutService {
         this.dataAccess = dataAccess;
     }
     public void logoutService() throws DataAccessException {
-        dataAccess.logout();
+        dataAccess.deleteAuth();
     }
 }

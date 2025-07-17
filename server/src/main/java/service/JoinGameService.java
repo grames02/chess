@@ -10,6 +10,6 @@ public class JoinGameService {
     }
 
     public void joinGameService() throws DataAccessException {
-        dataAccess.join_game();
+        dataAccess.getGame();
     }
 }

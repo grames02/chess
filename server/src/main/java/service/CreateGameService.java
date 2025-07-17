@@ -10,6 +10,6 @@ public class CreateGameService {
     }
 
     public void createGameService() throws DataAccessException {
-        dataAccess.create_game();
+        dataAccess.createGame();
     }
 }

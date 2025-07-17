@@ -9,6 +9,6 @@ public class LoginService {
         this.dataAccess = dataAccess;
     }
     public void loginService() throws DataAccessException {
-        dataAccess.login();
+        dataAccess.getUser();
     }
 }
