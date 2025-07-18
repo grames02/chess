@@ -35,6 +35,9 @@ public class JoinGameService {
             }
             game = game.withBlackUsername(username);
         }
+        else {
+            throw new DataAccessException("Error: invalid player color");
+        }
         dataAccess.updateGame(game);
     }
 }

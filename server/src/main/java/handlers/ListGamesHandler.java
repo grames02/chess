@@ -25,8 +25,9 @@ public class ListGamesHandler {
             } else {
                 response.status(500);
             }
-            return new Gson().toJson(new Error(e.getMessage()));
+            return new Gson().toJson(new ErrorResponse(e.getMessage()));
         }
     }
     private record GameListResponse(Collection<GameData> games) {}
+    private record ErrorResponse(String message) {}
 }
