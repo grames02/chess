@@ -50,7 +50,7 @@ public class Server {
         Spark.delete("/session", LogoutHandler::handle);
 
         // List game
-        Spark.get("/game", ListGamesHandler::handle);
+        Spark.get("/game", ListgameHandler::handle);
 
         // Create game
         Spark.post("/game", CreategameHandler::handle);
