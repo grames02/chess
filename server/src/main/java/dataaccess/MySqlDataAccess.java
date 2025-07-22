@@ -14,6 +14,10 @@ import java.util.Collection;
 import java.util.List;
 
 public class MySqlDataAccess implements DataAccess {
+
+
+
+
     @Override
     public void clearAll() throws DataAccessException {
         String[] tables = {"authdata", "userdata", "gamedata"};
@@ -71,19 +75,20 @@ public class MySqlDataAccess implements DataAccess {
 
     @Override
     public void createGame(GameData game) throws DataAccessException {
-        String sql = "INSERT INTO gamedata (gameid, gamename, whiteusername, blackusername, game) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO gamedata (gameid, whiteusername, blackusername, gamename, game) VALUES (?, ?, ?, ?, ?)";
         try (var conn = DatabaseManager.getConnection();
              var stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, game.gameID());
-            stmt.setString(2, game.gameName());
-            stmt.setString(3, game.whiteUsername());
-            stmt.setString(4, game.blackUsername());
+            stmt.setString(2, game.whiteUsername());
+            stmt.setString(3, game.blackUsername());
+            stmt.setString(4, game.gameName());
             stmt.setString(5, new Gson().toJson(game.game()));
             stmt.executeUpdate();
         } catch (Exception e) {
             throw new DataAccessException("Error Failed to insert game: " + e.getMessage(), e);
         }
     }
+
 
     @Override
     public void updateGame(GameData game) throws DataAccessException {
@@ -149,7 +154,7 @@ public class MySqlDataAccess implements DataAccess {
 
     @Override
     public GameData getGame(int gameId) throws DataAccessException {
-        String sql = "SELECT gameid, gamename, whiteusername, blackusername, game FROM gamedata WHERE gameid = ?";
+        String sql = "SELECT gameid, whiteusername, blackusername, gamename, game FROM gamedata WHERE gameid = ?";
         try (var conn = DatabaseManager.getConnection();
              var stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, gameId);
@@ -175,11 +180,10 @@ public class MySqlDataAccess implements DataAccess {
     @Override
     public Collection<GameData> listGames() throws DataAccessException {
         List<GameData> games = new ArrayList<>();
-        String sql = "SELECT * FROM gamedata";
+        String sql = "SELECT gameid, whiteusername, blackusername, gamename, game FROM gamedata";
         try (var conn = DatabaseManager.getConnection();
              var stmt = conn.prepareStatement(sql);
              var rs = stmt.executeQuery()) {
-
             while (rs.next()) {
                 int id = rs.getInt("gameid");
                 String name = rs.getString("gamename");
@@ -188,6 +192,7 @@ public class MySqlDataAccess implements DataAccess {
                 ChessGame game = new Gson().fromJson(rs.getString("game"), ChessGame.class);
                 games.add(new GameData(id, white, black, name, game));
             }
+
 
         } catch (Exception e) {
             throw new DataAccessException("Error Failed to list games: " + e.getMessage(), e);

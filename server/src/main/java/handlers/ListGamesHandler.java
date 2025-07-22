@@ -15,12 +15,12 @@ public class ListGamesHandler {
 
     public Object handle(Request request, Response response) {
         try {
-            String authToken = request.headers("Authorization");
+            String authToken = request.headers("authorization");
             Collection<GameData> games = listGamesService.listGameService(authToken);
             response.status(200);
             return new Gson().toJson(new GameListResponse(games));
         } catch (Exception e) {
-            if (e.getMessage().equals("Error: unauthorized")) {
+            if ("Error: unauthorized".equals(e.getMessage())) {
                 response.status(401);
             } else {
                 response.status(500);
@@ -28,6 +28,7 @@ public class ListGamesHandler {
             return new Gson().toJson(new ErrorResponse(e.getMessage()));
         }
     }
+
     private record GameListResponse(Collection<GameData> games) {}
     private record ErrorResponse(String message) {}
 }

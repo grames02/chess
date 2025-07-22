@@ -70,6 +70,58 @@ public class DatabaseManager {
         dbUsername = props.getProperty("db.user");
         dbPassword = props.getProperty("db.password");
 
-        connectionUrl = props.getProperty("db.url");
+        var host = props.getProperty("db.host");
+        var port = Integer.parseInt(props.getProperty("db.port"));
+        connectionUrl = String.format("jdbc:mysql://%s:%d", host, port);
     }
+
+
+    public static void createTables() {
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement()) {
+
+            // Drop tables if they exist to avoid conflicts (optional but helpful during dev)
+            stmt.executeUpdate("DROP TABLE IF EXISTS authdata;");
+            stmt.executeUpdate("DROP TABLE IF EXISTS games;");
+            stmt.executeUpdate("DROP TABLE IF EXISTS userdata;");
+
+            // Create userdata table
+            stmt.executeUpdate("""
+            CREATE TABLE IF NOT EXISTS userdata (
+                username VARCHAR(255) PRIMARY KEY,
+                password VARCHAR(255) NOT NULL,
+                email VARCHAR(255) NOT NULL
+            );
+        """);
+
+            // Create authdata table with FK to userdata.username
+            stmt.executeUpdate("""
+            CREATE TABLE IF NOT EXISTS authdata (
+                authtoken VARCHAR(255) PRIMARY KEY,
+                username VARCHAR(255) NOT NULL,
+                FOREIGN KEY (username) REFERENCES userdata(username) ON DELETE CASCADE
+            );
+        """);
+
+            // Create games table
+            stmt.executeUpdate("""
+            CREATE TABLE IF NOT EXISTS gamedata (
+                gameid INT PRIMARY KEY AUTO_INCREMENT,
+                whiteusername VARCHAR(255),
+                blackusername VARCHAR(255),
+                gamename VARCHAR(255),
+                game TEXT
+            );
+        """);
+
+            System.out.println("Tables created successfully!");
+
+        } catch (SQLException | DataAccessException e) {
+            System.err.println("Error creating tables: " + e.getMessage());
+        }
+    }
+
+
+
+
 }

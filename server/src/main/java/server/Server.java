@@ -12,6 +12,12 @@ public class Server {
         Spark.staticFiles.location("web");
 
         // Variables to bring in.
+        try {
+        DatabaseManager.createDatabase();
+        DatabaseManager.createTables();
+        } catch (Exception e) {
+
+        }
         var dataAccess = new MySqlDataAccess();
 
         var clearService = new ClearService(dataAccess);
