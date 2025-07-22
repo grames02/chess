@@ -81,4 +81,6 @@ public class SQLTests {
         dao.createAuth(auth);
         assertThrows(DataAccessException.class, () -> dao.createAuth(auth));
     }
+
+    //
 }

@@ -19,8 +19,12 @@ public class LoginService {
     public LoginResult loginService(LoginRequest request) throws DataAccessException {
         var username = request.username();
         var password = request.password();
-        UserData user = dataAccess.getUser(username);
-        if (user == null || !BCrypt.checkpw(password, user.password())) {
+        UserData database_user = dataAccess.getUser(username);
+        if (database_user == null) {
+            throw new DataAccessException("Error: unauthorized");
+        }
+        String db_hash_password = database_user.password();
+        if (!BCrypt.checkpw(password, db_hash_password)) {
             throw new DataAccessException("Error: unauthorized");
         }
         String token = UUID.randomUUID().toString();

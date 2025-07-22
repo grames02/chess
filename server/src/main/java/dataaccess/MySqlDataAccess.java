@@ -118,7 +118,7 @@ public class MySqlDataAccess implements DataAccess {
                             rs.getString("email")
                     );
                 } else {
-                    return null; // user not found
+                    return null;
                 }
             }
         } catch (Exception e) {
