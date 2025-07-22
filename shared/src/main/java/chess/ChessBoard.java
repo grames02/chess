@@ -1,6 +1,5 @@
 package chess;
 
-import java.awt.*;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -64,8 +63,8 @@ public class ChessBoard {
                 for (int j = 0; j <= 5; j++) {
                     if (j == 0) {
                     // Pawns
-                        ChessPiece white_p = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
-                        ChessPiece black_p = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN);
+                        ChessPiece whiteP = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
+                        ChessPiece blackP = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN);
                         // We will use a nested for loop to produce all the pawns
                         for (int i = 0; i <= 1; i++) {
                                 for (int k = 1; k <= 8; k++) {
@@ -73,80 +72,80 @@ public class ChessBoard {
                                         // We are setting up the white pawns.
                                         int row = 2;
                                         ChessPosition position = new ChessPosition(row, k);
-                                        addPiece(position, white_p);
+                                        addPiece(position, whiteP);
                                     }
 
                                     else {
                                         // We are setting up the black pawns.
                                         int row = 7;
                                         ChessPosition position = new ChessPosition(row, k);
-                                        addPiece(position, black_p);
+                                        addPiece(position, blackP);
                                     }
                                 }
                             }
                         }
                     else if (j == 1) {
                     // Knights
-                        ChessPiece white_n = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT);
+                        ChessPiece whiteN = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT);
                         ChessPosition position = new ChessPosition(1, 2);
                         ChessPosition position2 = new ChessPosition(1, 7);
-                        addPiece(position, white_n);
-                        addPiece(position2, white_n);
+                        addPiece(position, whiteN);
+                        addPiece(position2, whiteN);
 
-                        ChessPiece black_n = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT);
+                        ChessPiece blackN = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT);
                         ChessPosition position3 = new ChessPosition(8, 2);
                         ChessPosition position4 = new ChessPosition(8, 7);
-                        addPiece(position3, black_n);
-                        addPiece(position4, black_n);
+                        addPiece(position3, blackN);
+                        addPiece(position4, blackN);
 
                     }
                     else if (j == 2) {
                     // Rooks
-                        ChessPiece white_r = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);
+                        ChessPiece whiteR = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);
                         ChessPosition position = new ChessPosition(1,1);
                         ChessPosition position2 = new ChessPosition(1,8);
-                        addPiece(position, white_r);
-                        addPiece(position2, white_r);
+                        addPiece(position, whiteR);
+                        addPiece(position2, whiteR);
 
-                        ChessPiece black_r = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK);
+                        ChessPiece blackR = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK);
                         ChessPosition position3 = new ChessPosition(8,1);
                         ChessPosition position4 = new ChessPosition(8,8);
-                        addPiece(position3, black_r);
-                        addPiece(position4, black_r);
+                        addPiece(position3, blackR);
+                        addPiece(position4, blackR);
                     }
                     else if (j == 3) {
                     // Bishops
-                        ChessPiece white_b = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP);
+                        ChessPiece whiteB = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP);
                         ChessPosition position = new ChessPosition(1,3);
                         ChessPosition position2 = new ChessPosition(1,6);
-                        addPiece(position, white_b);
-                        addPiece(position2, white_b);
+                        addPiece(position, whiteB);
+                        addPiece(position2, whiteB);
 
-                        ChessPiece black_b = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP);
+                        ChessPiece blackB = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP);
                         ChessPosition position3 = new ChessPosition(8,3);
                         ChessPosition position4 = new ChessPosition(8,6);
-                        addPiece(position3, black_b);
-                        addPiece(position4, black_b);
+                        addPiece(position3, blackB);
+                        addPiece(position4, blackB);
                     }
                     else if (j == 4) {
                     // Kings
-                        ChessPiece white_k = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING);
+                        ChessPiece whiteK = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING);
                         ChessPosition position = new ChessPosition(1,5);
-                        addPiece(position, white_k);
+                        addPiece(position, whiteK);
 
-                        ChessPiece black_k = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING);
+                        ChessPiece blackK = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING);
                         ChessPosition position2 = new ChessPosition(8,5);
-                        addPiece(position2, black_k);
+                        addPiece(position2, blackK);
                     }
                     else if (j == 5) {
                     // Queens
-                        ChessPiece white_q = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN);
+                        ChessPiece whiteQ = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN);
                         ChessPosition position = new ChessPosition(1,4);
-                        addPiece(position, white_q);
+                        addPiece(position, whiteQ);
 
-                        ChessPiece black_q = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.QUEEN);
+                        ChessPiece blackQ = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.QUEEN);
                         ChessPosition position2 = new ChessPosition(8,4);
-                        addPiece(position2, black_q);
+                        addPiece(position2, blackQ);
                     }
                 }
     }

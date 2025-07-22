@@ -6,7 +6,6 @@ import model.AuthData;
 import model.LoginRequest;
 import model.LoginResult;
 import model.UserData;
-import org.eclipse.jetty.util.log.Log;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.UUID;
@@ -19,12 +18,12 @@ public class LoginService {
     public LoginResult loginService(LoginRequest request) throws DataAccessException {
         var username = request.username();
         var password = request.password();
-        UserData database_user = dataAccess.getUser(username);
-        if (database_user == null) {
+        UserData databaseUser = dataAccess.getUser(username);
+        if (databaseUser == null) {
             throw new DataAccessException("Error: unauthorized");
         }
-        String db_hash_password = database_user.password();
-        if (!BCrypt.checkpw(password, db_hash_password)) {
+        String dbHashPassword = databaseUser.password();
+        if (!BCrypt.checkpw(password, dbHashPassword)) {
             throw new DataAccessException("Error: unauthorized");
         }
         String token = UUID.randomUUID().toString();

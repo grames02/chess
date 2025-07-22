@@ -20,20 +20,20 @@ public class Server {
         var registerService = new RegisterService(dataAccess);
         var registerHandler = new RegisterHandler(registerService);
 
-        var CreategameService = new CreateGameService(dataAccess);
-        var CreategameHandler = new CreateGameHandler(CreategameService);
+        var createGameService = new CreateGameService(dataAccess);
+        var createGameHandler = new CreateGameHandler(createGameService);
 
-        var JoingameService = new JoinGameService(dataAccess);
-        var JoingameHandler = new JoinGameHandler(JoingameService);
+        var joinGameService = new JoinGameService(dataAccess);
+        var joinGameHandler = new JoinGameHandler(joinGameService);
 
-        var ListGamesService = new ListGamesService(dataAccess);
-        var ListGameHandler = new ListGamesHandler(ListGamesService);
+        var listGamesService = new ListGamesService(dataAccess);
+        var listGameHandler = new ListGamesHandler(listGamesService);
 
-        var LoginService = new LoginService(dataAccess);
-        var LoginHandler = new LoginHandler(LoginService);
+        var loginService = new LoginService(dataAccess);
+        var loginHandler = new LoginHandler(loginService);
 
-        var LogoutService = new LogoutService(dataAccess);
-        var LogoutHandler = new LogoutHandler(LogoutService);
+        var logoutService = new LogoutService(dataAccess);
+        var logoutHandler = new LogoutHandler(logoutService);
 
         // Register your endpoints and handle exceptions here.
 
@@ -44,19 +44,19 @@ public class Server {
         Spark.post("/user", registerHandler::handle);
 
         // Login
-        Spark.post("/session", LoginHandler::handle);
+        Spark.post("/session", loginHandler::handle);
 
         // Logout
-        Spark.delete("/session", LogoutHandler::handle);
+        Spark.delete("/session", logoutHandler::handle);
 
         // List game
-        Spark.get("/game", ListGameHandler::handle);
+        Spark.get("/game", listGameHandler::handle);
 
         // Create game
-        Spark.post("/game", CreategameHandler::handle);
+        Spark.post("/game", createGameHandler::handle);
 
         // Join game
-        Spark.put("/game", JoingameHandler::handle);
+        Spark.put("/game", joinGameHandler::handle);
 
 
         //This line initializes the server and can be removed once you have a functioning endpoint 
