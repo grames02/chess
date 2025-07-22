@@ -85,31 +85,23 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-
-
         ChessPosition start = move.getStartPosition();
         ChessPosition end = move.getEndPosition();
         ChessPiece piece = board.getPiece(start);
         if (piece == null) {
             throw new InvalidMoveException("No piece!");
         }
-
         Collection<ChessMove> legalMoves = validMoves(start);
         if (!legalMoves.contains(move)) {
             throw new InvalidMoveException("Invalid movement.");
         }
-
         TeamColor color = piece.getTeamColor();
-
         ChessPiece endPiece = board.getPiece(end);
         if (endPiece != null) {
             if (endPiece.getTeamColor() == piece.getTeamColor()) {
                 throw new InvalidMoveException("Same color");
             }
         }
-
-
-
         // Ensuring everything is within bounds.
         if (start.getRow() < 1 || start.getRow() > 8 || start.getColumn() < 1 || start.getColumn() > 8) {
             throw new InvalidMoveException("Start area is out of bounds");
@@ -117,7 +109,6 @@ public class ChessGame {
         if (end.getRow() < 1 || end.getRow() > 8 || end.getColumn() < 1 || end.getColumn() > 8) {
             throw new InvalidMoveException("End area is out of bounds");
         }
-
         // Tests for Pawns
         if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
             // For when pawns go diagonally and there was no enemy in the corner.
@@ -129,7 +120,6 @@ public class ChessGame {
                     throw new InvalidMoveException("No piece was in the corner. Pawn cannot move that way.");
                 }
             }
-
             // For when pawns go more than 1, and they're not at the front line.
             if (start.getRow() != 2 && piece.getTeamColor() == TeamColor.WHITE) {
                 int value1 = start.getRow();
@@ -140,12 +130,10 @@ public class ChessGame {
                     throw new InvalidMoveException("Pawn cannot go that far");
                 }
             }
-
             if (start.getRow() == 2 && piece.getTeamColor() == TeamColor.WHITE) {
                 int value1 = start.getRow();
                 int value2 = end.getRow();
                 int result = value2 - value1;
-
                 if (result > 2) {
                     throw new InvalidMoveException("Pawn cannot go that far");
                 }
@@ -168,7 +156,6 @@ public class ChessGame {
                     throw new InvalidMoveException("Pawn cannot go that far");
                 }
             }
-
         }
 
         if (piece.getTeamColor() != currentTurn) {
