@@ -203,7 +203,9 @@ public class ChessGame {
                 ChessPiece thatPiece = board.getPiece(pieceChecker);
                 if (thatPiece != null && thatPiece.getTeamColor() != teamColor) {
                     Collection<ChessMove> moves = new ChessPieceCalculator(thatPiece, pieceChecker, board).pieceMoveset();
-                    kingChecker(moves, kingPosition);
+                    if (kingChecker(moves, kingPosition)) {
+                        return true;
+                    }
                 }
             }
         }
