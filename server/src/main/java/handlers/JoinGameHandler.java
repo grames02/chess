@@ -30,8 +30,11 @@ public class JoinGameHandler {
                 response.status(401);
             } else if (e.getMessage().contains("already taken")) {
                 response.status(403);
-            } else {
+            } else if (e.getMessage().contains("invalid player color")) {
                 response.status(400);
+            }
+            else {
+                response.status(500);
             }
             return gson.toJson(new Error(e.getMessage()));
         }

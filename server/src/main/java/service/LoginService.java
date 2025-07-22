@@ -7,6 +7,7 @@ import model.LoginRequest;
 import model.LoginResult;
 import model.UserData;
 import org.eclipse.jetty.util.log.Log;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.UUID;
 
@@ -19,7 +20,7 @@ public class LoginService {
         var username = request.username();
         var password = request.password();
         UserData user = dataAccess.getUser(username);
-        if (user == null || !user.password().equals(password)) {
+        if (user == null || !BCrypt.checkpw(password, user.password())) {
             throw new DataAccessException("Error: unauthorized");
         }
         String token = UUID.randomUUID().toString();

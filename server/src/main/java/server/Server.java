@@ -12,7 +12,7 @@ public class Server {
         Spark.staticFiles.location("web");
 
         // Variables to bring in.
-        var dataAccess = new DataManager();
+        var dataAccess = new MySqlDataAccess();
 
         var clearService = new ClearService(dataAccess);
         var clearHandler = new ClearHandler(clearService);
