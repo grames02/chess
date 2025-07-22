@@ -26,8 +26,8 @@ public class Server {
         var JoingameService = new JoinGameService(dataAccess);
         var JoingameHandler = new JoinGameHandler(JoingameService);
 
-        var ListgameService = new ListGamesService(dataAccess);
-        var ListgameHandler = new ListGamesHandler(ListgameService);
+        var ListGamesService = new ListGamesService(dataAccess);
+        var ListGameHandler = new ListGamesHandler(ListGamesService);
 
         var LoginService = new LoginService(dataAccess);
         var LoginHandler = new LoginHandler(LoginService);
@@ -50,7 +50,7 @@ public class Server {
         Spark.delete("/session", LogoutHandler::handle);
 
         // List game
-        Spark.get("/game", ListgameHandler::handle);
+        Spark.get("/game", ListGameHandler::handle);
 
         // Create game
         Spark.post("/game", CreategameHandler::handle);

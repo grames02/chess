@@ -24,7 +24,7 @@ public class SQLTests {
     // Create User
     @Test
     //Good
-    void testCreate_GetUser_Good() throws DataAccessException {
+    void TestCreateGetUserGood() throws DataAccessException {
         UserData user = new UserData("example_username", "cool_password", "even_cooler_email");
         dao.createUser(user);
         UserData fromDb = dao.getUser(user.username());
@@ -35,7 +35,7 @@ public class SQLTests {
 
     @Test
     // Bad
-    void testCreate_DuplicateUser_Bad() throws DataAccessException {
+    void TestCreateDuplicateUserBad() throws DataAccessException {
         UserData user = new UserData("example_username", "cool_password", "even_cooler_email");
         dao.createUser(user);
         assertThrows(DataAccessException.class, () -> dao.createUser(user));
@@ -45,7 +45,7 @@ public class SQLTests {
     // Getting AuthToken
     // Good
     @Test
-    void testCreate_getAuth_good() throws DataAccessException {
+    void TestCreateGetAuthGood() throws DataAccessException {
         dao.createUser(new UserData("example_username", "cool_password", "even_cooler_email"));
         AuthData auth = new AuthData("some_cool_authtoken", "example_username");
         dao.createAuth(auth);
@@ -58,13 +58,13 @@ public class SQLTests {
 
     @Test
     // Bad
-    void testCreate_getAuth_badDoesNotExist() throws DataAccessException {
+    void TestCreateGetAuthBadDoesNotExist() throws DataAccessException {
         UserData res = dao.getUser("does not exist");
         assertNull(res);
     }
     // Delete AuthToken
     @Test
-    void testDeleteAuth_good() throws DataAccessException{
+    void TestDeleteAuthGood() throws DataAccessException{
         dao.createUser(new UserData("another_dope_user", "another_sweet_password", "howdy@gmail.com"));
         AuthData auth = new AuthData("authtoken2.0", "another_dope_user");
         dao.createAuth(auth);
@@ -74,7 +74,7 @@ public class SQLTests {
     }
     // Duplicate AuthToken
     @Test
-    void test_make_duplicate_auth_token() throws DataAccessException {
+    void TestMakeDuplicateAuthToken() throws DataAccessException {
         dao.createUser(new UserData("example_username", "cool_password", "even_cooler_email"));
         AuthData auth = new AuthData("some_cool_authtoken", "example_username");
         dao.createAuth(auth);
@@ -83,7 +83,7 @@ public class SQLTests {
 
     //Create & Get game
     @Test
-    void Create_Get_Game_Test_good() throws DataAccessException {
+    void CreateGetGameTestGood() throws DataAccessException {
         ChessGame game = new ChessGame();
         GameData gameData = new GameData(1, "white", "black", "chess_game", game);
         dao.createGame(gameData);
@@ -95,7 +95,7 @@ public class SQLTests {
     }
 
     @Test
-    void list_games_test_positive() throws DataAccessException {
+    void ListGamesTestPositive() throws DataAccessException {
         dao.createGame(new GameData(1, "white", "black", "Game 1", new ChessGame()));
         dao.createGame(new GameData(2, "white", "black", "Game 2", new ChessGame()));
         Collection<GameData> games = dao.listGames();
@@ -103,7 +103,7 @@ public class SQLTests {
     }
 
     @Test
-    void update_game_positive() throws DataAccessException {
+    void UpdateGamePositive() throws DataAccessException {
         ChessGame game = new ChessGame();
         GameData og = new GameData(2, "white", "black", "og", game);
         dao.createGame(og);
@@ -127,13 +127,13 @@ public class SQLTests {
 
 
     @Test
-    void Get_bad_auth_token() throws DataAccessException {
+    void GetBadAuthToken() throws DataAccessException {
         AuthData result = dao.getAuth("scrambled eggs");
         assertNull(result);
     }
 
     @Test
-    void Delete_imaginary_auth_token() throws DataAccessException {
+    void DeleteImaginaryAuthToken() throws DataAccessException {
         dao.deleteAuth("this is imaginary");
         assertNull(dao.getAuth("this is imaginary"));
     }
@@ -146,13 +146,13 @@ public class SQLTests {
     }
 
     @Test
-    void Imaginary_game() throws DataAccessException {
+    void ImaginaryGame() throws DataAccessException {
         GameData result = dao.getGame(99999999);
         assertNull(result);
     }
 
     @Test
-    void Update_Imaginary_Game() {
+    void UpdateImaginaryGame() {
         GameData game = new GameData(200, "w", "b", "not real", new ChessGame());
         assertThrows(DataAccessException.class, () -> dao.updateGame(game));
     }
