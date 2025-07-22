@@ -232,10 +232,12 @@ public class ChessPieceCalculator {
 
 
     private Collection<ChessMove> pawnMovement() {
+        // This one will be setup differently due to Pawn's more unique moveset.
         List<ChessMove> moves = new ArrayList<>();
         int row = position.getRow();
         int col = position.getColumn();
         int direction = piece.getTeamColor() == ChessGame.TeamColor.WHITE ? 1 : -1;
+        //If it's white or black & where it's starting at and what direction it's moving
         int startingR = piece.getTeamColor() == ChessGame.TeamColor.WHITE ? 2 : 7;
         int promotionR = piece.getTeamColor() == ChessGame.TeamColor.WHITE ? 8 : 1;
 
@@ -267,28 +269,27 @@ public class ChessPieceCalculator {
         for (int i = -1; i <= 1; i += 2) {
             int newCol = col + i;
             int diagR = row + direction;
-            if (withinBounds(diagR, newCol)) {
-                ChessPosition diag = new ChessPosition(diagR, newCol);
-                ChessPiece destPiece = board.getPiece(diag);
-                if (destPiece != null && destPiece.getTeamColor() != piece.getTeamColor()) {
-                    if (diagR == promotionR) {
-                        for (ChessPiece.PieceType promotype : new ChessPiece.PieceType[]{
-                                ChessPiece.PieceType.QUEEN,
-                                ChessPiece.PieceType.BISHOP,
-                                ChessPiece.PieceType.KNIGHT,
-                                ChessPiece.PieceType.ROOK}) {
-                            moves.add(new ChessMove(position, diag, promotype));
-                        }
-                    } else {
-                        moves.add(new ChessMove(position, diag, null));
-                    }
+            if (!withinBounds(diagR, newCol)) continue;
+
+            ChessPosition diag = new ChessPosition(diagR, newCol);
+            ChessPiece destPiece = board.getPiece(diag);
+            if (destPiece == null || destPiece.getTeamColor() == piece.getTeamColor()) continue;
+
+            if (diagR == promotionR) {
+                for (ChessPiece.PieceType promotype : new ChessPiece.PieceType[]{
+                        ChessPiece.PieceType.QUEEN,
+                        ChessPiece.PieceType.BISHOP,
+                        ChessPiece.PieceType.KNIGHT,
+                        ChessPiece.PieceType.ROOK}) {
+                    moves.add(new ChessMove(position, diag, promotype));
                 }
+            } else {
+                moves.add(new ChessMove(position, diag, null));
             }
         }
         // Promotion
         return moves;
     }
-
 
 
 
