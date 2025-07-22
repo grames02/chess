@@ -82,5 +82,47 @@ public class SQLTests {
         assertThrows(DataAccessException.class, () -> dao.createAuth(auth));
     }
 
-    //
+    //Create & Get game
+    @Test
+    void Create_Get_Game_Test_good() throws DataAccessException {
+        ChessGame game = new ChessGame();
+        GameData gameData = new GameData(1, "white", "black", "chess_game", game);
+        dao.createGame(gameData);
+        GameData fromDb = dao.getGame(1);
+        assertNotNull(fromDb);
+        assertEquals("chess_game", fromDb.gameName());
+        assertEquals("white", fromDb.whiteUsername());
+        assertEquals("black", fromDb.blackUsername());
+    }
+
+    @Test
+    void list_games_test_positive() throws DataAccessException {
+        dao.createGame(new GameData(1, "white", "black", "Game 1", new ChessGame()));
+        dao.createGame(new GameData(2, "white", "black", "Game 2", new ChessGame()));
+        Collection<GameData> games = dao.listGames();
+        assertEquals(2, games.size());
+    }
+
+    @Test
+    void update_game_positive() throws DataAccessException {
+        ChessGame game = new ChessGame();
+        GameData og = new GameData(2, "white", "black", "og", game);
+        dao.createGame(og);
+        GameData updated = new GameData(2, "white", "black", "new name", game);
+        dao.updateGame(updated);
+        GameData fromDb = dao.getGame(2);
+        assertEquals("new name", fromDb.gameName());
+    }
+
+    @Test
+    void ClearTest() throws DataAccessException {
+        dao.createUser(new UserData("yo", "sup", "dawg"));
+        dao.createAuth(new AuthData("something", "yo"));
+        dao.createGame(new GameData(3, "w", "b", "battle", new ChessGame()));
+        dao.clear_all();
+
+        assertNull(dao.getUser("yo"));
+        assertNull(dao.getAuth("something"));
+        assertNull(dao.getGame(3));
+    }
 }
