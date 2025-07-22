@@ -2,6 +2,7 @@ package dataaccess;
 
 import chess.ChessGame;
 import model.*;
+import org.eclipse.jetty.server.Authentication;
 import org.junit.jupiter.api.*;
 import java.util.Collection;
 
@@ -56,6 +57,28 @@ public class SQLTests {
         assertEquals("example_username", fromDb.username());
     }
 
-
-
+    @Test
+    // Bad
+    void testCreate_getAuth_badDoesNotExist() throws DataAccessException {
+        UserData res = dao.getUser("does not exist");
+        assertNull(res);
+    }
+    // Delete AuthToken
+    @Test
+    void testDeleteAuth_good() throws DataAccessException{
+        dao.createUser(new UserData("another_dope_user", "another_sweet_password", "howdy@gmail.com"));
+        AuthData auth = new AuthData("authtoken2.0", "another_dope_user");
+        dao.createAuth(auth);
+        dao.deleteAuth("authtoken2.0");
+        AuthData hopefullyNull = dao.getAuth("authtoken2.0");
+        assertNull(hopefullyNull);
+    }
+    // Duplicate AuthToken
+    @Test
+    void test_make_duplicate_auth_token() throws DataAccessException {
+        dao.createUser(new UserData("example_username", "cool_password", "even_cooler_email"));
+        AuthData auth = new AuthData("some_cool_authtoken", "example_username");
+        dao.createAuth(auth);
+        assertThrows(DataAccessException.class, () -> dao.createAuth(auth));
+    }
 }
