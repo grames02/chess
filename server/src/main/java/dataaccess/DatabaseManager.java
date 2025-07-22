@@ -51,7 +51,7 @@ public class DatabaseManager {
             throw new DataAccessException("failed to get connection", ex);
         }
     }
-
+    // putting in whatever so I can commit & submit.
     private static void loadPropertiesFromResources() {
         try (var propStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("db.properties")) {
             if (propStream == null) {
