@@ -125,4 +125,36 @@ public class SQLTests {
         assertNull(dao.getAuth("something"));
         assertNull(dao.getGame(3));
     }
+
+
+    @Test
+    void Get_bad_auth_token() throws DataAccessException {
+        AuthData result = dao.getAuth("scrambled eggs");
+        assertNull(result);
+    }
+
+    @Test
+    void Delete_imaginary_auth_token() throws DataAccessException {
+        dao.deleteAuth("this is imaginary");
+        assertNull(dao.getAuth("this is imaginary"));
+    }
+
+    @Test
+    void DuplicateGame() throws DataAccessException {
+        GameData game = new GameData(20, "w", "b", "Game_time", new ChessGame());
+        dao.createGame(game);
+        assertThrows(DataAccessException.class, () -> dao.createGame(game));
+    }
+
+    @Test
+    void Imaginary_game() throws DataAccessException {
+        GameData result = dao.getGame(99999999);
+        assertNull(result);
+    }
+
+    @Test
+    void Update_Imaginary_Game() {
+        GameData game = new GameData(200, "w", "b", "not real", new ChessGame());
+        assertThrows(DataAccessException.class, () -> dao.updateGame(game));
+    }
 }
