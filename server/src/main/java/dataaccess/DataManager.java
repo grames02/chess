@@ -1,5 +1,6 @@
 package dataaccess;
 import model.*;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.*;
 
@@ -23,7 +24,9 @@ public class DataManager implements DataAccess {
         if (userList.containsKey(user.username())) {
             throw new DataAccessException("User already exists.");
         }
-        userList.put(user.username(), user);
+        String hashedPassword = BCrypt.hashpw(user.password(), BCrypt.gensalt());
+        UserData hashedUser = new UserData(user.username(), hashedPassword, user.email());
+        userList.put(user.username(), hashedUser);
     }
 
     public void createAuth(AuthData auth) throws DataAccessException {
