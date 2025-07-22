@@ -21,7 +21,9 @@ public class SQLTests {
     }
 
     // Now we'll test the functions.
+    // Create User
     @Test
+    //Good
     void testCreate_GetUser_Good() throws DataAccessException {
         UserData user = new UserData("example_username", "cool_password", "even_cooler_email");
         dao.createUser(user);
@@ -31,6 +33,28 @@ public class SQLTests {
         assertNotEquals("unhashed_password", fromDb.password());
     }
 
+    @Test
+    // Bad
+    void testCreate_DuplicateUser_Bad() throws DataAccessException {
+        UserData user = new UserData("example_username", "cool_password", "even_cooler_email");
+        dao.createUser(user);
+        assertThrows(DataAccessException.class, () -> dao.createUser(user));
+    }
+
+
+    // Getting AuthToken
+    // Good
+    @Test
+    void testCreate_getAuth_good() throws DataAccessException {
+        dao.createUser(new UserData("example_username", "cool_password", "even_cooler_email"));
+        AuthData auth = new AuthData("some_cool_authtoken", "example_username");
+        dao.createAuth(auth);
+        // Now we compare it
+        AuthData fromDb = dao.getAuth("some_cool_authtoken");
+        assertNotNull(fromDb);
+        assertEquals("some_cool_authtoken", fromDb.authToken());
+        assertEquals("example_username", fromDb.username());
+    }
 
 
 
