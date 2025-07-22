@@ -15,7 +15,7 @@ import java.util.List;
 
 public class MySqlDataAccess implements DataAccess {
     @Override
-    public void clear_all() throws DataAccessException {
+    public void clearAll() throws DataAccessException {
         String[] tables = {"authdata", "userdata", "gamedata"};
         try (var conn = DatabaseManager.getConnection()) {
             for (String table : tables) {

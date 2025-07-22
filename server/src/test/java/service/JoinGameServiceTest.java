@@ -19,7 +19,7 @@ public class JoinGameServiceTest {
         joinGameService = new JoinGameService(dataAccess);
 
         // Clear DB and add test auth and game
-        dataAccess.clear_all();
+        dataAccess.clearAll();
 
         dataAccess.createAuth(new AuthData("token123", "user1"));
         dataAccess.createGame(new GameData(2, null, null, "Test Game", null));

@@ -6,7 +6,7 @@ import java.util.Collection;
 
 public interface DataAccess {
     // Deleting Stuff
-    void clear_all() throws DataAccessException;
+    void clearAll() throws DataAccessException;
 
     void deleteAuth(String authToken) throws DataAccessException;
 

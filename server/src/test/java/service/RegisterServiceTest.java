@@ -16,7 +16,7 @@ public class RegisterServiceTest {
     public void setUp() throws DataAccessException {
         dataAccess = new DataManager();
         registerService = new RegisterService(dataAccess);
-        dataAccess.clear_all();
+        dataAccess.clearAll();
     }
 
     @Test

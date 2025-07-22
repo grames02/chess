@@ -58,7 +58,7 @@ public class ChessGame {
         if (our_piece == null) {
             return null;
         }
-        Collection<ChessMove> moves = new ChessPieceCalculator(our_piece, startPosition, board).piece_moveset();
+        Collection<ChessMove> moves = new ChessPieceCalculator(our_piece, startPosition, board).pieceMoveset();
         Collection<ChessMove> approved_moves = new ArrayList<>();
 
         TeamColor teamColor = our_piece.getTeamColor();
@@ -111,40 +111,6 @@ public class ChessGame {
             }
         }
 
-        // For The King.
-        if (piece.getPieceType() == ChessPiece.PieceType.KING) {
-            int startR = start.getRow();
-            int startC = start.getColumn();
-            int endR = end.getRow();
-            int endC = end.getColumn();
-            int row_difference = endR - startR;
-            int col_difference = endC - startC;
-            if (row_difference != -1 && row_difference != 1 && row_difference != 0) {
-                throw new InvalidMoveException("Too far for the King.");
-            }
-            if (col_difference != -1 && col_difference != 1 && col_difference != 0) {
-                throw new InvalidMoveException("Too far for the King.");
-            }
-        }
-
-        // Knights
-        if (piece.getPieceType() == ChessPiece.PieceType.KNIGHT) {
-            int startR = start.getRow();
-            int startC = start.getColumn();
-            int endR = end.getRow();
-            int endC = end.getColumn();
-            int row_difference = endR - startR;
-            int col_difference = endC - startC;
-            if (col_difference < 0) {
-                col_difference = col_difference * -1;
-            }
-            if (row_difference < 0) {
-                row_difference = row_difference * -1;
-            }
-            if (!((row_difference == 2 && col_difference == 1) || (row_difference == 1 && col_difference == 2))) {
-                throw new InvalidMoveException("Too far for the Knight");
-            }
-        }
 
 
         // Ensuring everything is within bounds.
@@ -263,7 +229,7 @@ public class ChessGame {
                 ChessPosition piece_checker = new ChessPosition(i, j);
                 ChessPiece that_piece = board.getPiece(piece_checker);
                 if (that_piece != null && that_piece.getTeamColor() != teamColor) {
-                    Collection<ChessMove> moves = new ChessPieceCalculator(that_piece, piece_checker, board).piece_moveset();
+                    Collection<ChessMove> moves = new ChessPieceCalculator(that_piece, piece_checker, board).pieceMoveset();
                     for (ChessMove move : moves) {
                         if (move.getEndPosition().equals(kingPosition)) {
                             return true;

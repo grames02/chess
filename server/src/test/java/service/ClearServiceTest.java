@@ -26,7 +26,7 @@ public class ClearServiceTest {
 
     @Test
     public void testClearSuccess() throws DataAccessException {
-        dataAccess.clear_all();
+        dataAccess.clearAll();
         assertNull(dataAccess.getUser("testUser"));
         assertNull(dataAccess.getAuth("token123"));
         assertNull(dataAccess.getGame(42));

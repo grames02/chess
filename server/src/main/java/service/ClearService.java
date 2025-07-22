@@ -10,6 +10,6 @@ public class ClearService {
         this.dataAccess = dataAccess;
     }
     public void clearApplication() throws DataAccessException {
-        dataAccess.clear_all();
+        dataAccess.clearAll();
     }
 }

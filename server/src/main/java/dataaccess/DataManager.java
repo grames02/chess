@@ -10,7 +10,7 @@ public class DataManager implements DataAccess {
     private final Map<Integer, GameData> game_list = new HashMap<>();
 
     // Clear App.
-    public void clear_all() throws DataAccessException {
+    public void clearAll() throws DataAccessException {
         auth_codes.clear();
         game_list.clear();
         user_list.clear();

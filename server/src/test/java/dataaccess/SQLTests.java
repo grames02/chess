@@ -2,7 +2,6 @@ package dataaccess;
 
 import chess.ChessGame;
 import model.*;
-import org.eclipse.jetty.server.Authentication;
 import org.junit.jupiter.api.*;
 import java.util.Collection;
 
@@ -18,7 +17,7 @@ public class SQLTests {
     }
     @BeforeEach
     void setup() throws DataAccessException {
-        dao.clear_all();
+        dao.clearAll();
     }
 
     // Now we'll test the functions.
@@ -119,7 +118,7 @@ public class SQLTests {
         dao.createUser(new UserData("yo", "sup", "dawg"));
         dao.createAuth(new AuthData("something", "yo"));
         dao.createGame(new GameData(3, "w", "b", "battle", new ChessGame()));
-        dao.clear_all();
+        dao.clearAll();
 
         assertNull(dao.getUser("yo"));
         assertNull(dao.getAuth("something"));

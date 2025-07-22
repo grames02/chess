@@ -18,26 +18,26 @@ public class ChessPieceCalculator {
         this.board = board;
     }
 
-    public Collection<ChessMove> piece_moveset() {
+    public Collection<ChessMove> pieceMoveset() {
         ChessPiece.PieceType type = piece.getPieceType();
 
         if (type == ChessPiece.PieceType.KING) {
-            return king_movement();
+            return kingMovement();
         }
         else if (type == ChessPiece.PieceType.QUEEN) {
-            return queen_movement();
+            return queenMovement();
         }
         else if (type == ChessPiece.PieceType.ROOK) {
-            return rook_movement();
+            return rookMovement();
         }
         else if (type == ChessPiece.PieceType.BISHOP) {
-            return bishop_movement();
+            return bishopMovement();
         }
         else if (type == ChessPiece.PieceType.KNIGHT) {
-            return knight_movement();
+            return knightMovement();
         }
         else if (type == ChessPiece.PieceType.PAWN) {
-            return pawn_movement();
+            return pawnMovement();
         }
 
         return null;
@@ -45,7 +45,7 @@ public class ChessPieceCalculator {
 
     }
 
-    private Collection<ChessMove> king_movement() {
+    private Collection<ChessMove> kingMovement() {
         List<ChessMove> moves = new ArrayList<>();
         int[][] directions = {
                 {-1, -1}, {-1, 0}, {-1, 1},
@@ -59,7 +59,7 @@ public class ChessPieceCalculator {
             int newRow = row + d[0];
             int newCol = col + d[1];
 
-            if (within_bounds(newRow, newCol)) {
+            if (withinBounds(newRow, newCol)) {
                 ChessPosition newP = new ChessPosition(newRow, newCol);
                 ChessPiece destPiece = board.getPiece(newP);
 
@@ -77,7 +77,7 @@ public class ChessPieceCalculator {
 
 
 
-    private Collection<ChessMove> queen_movement() {
+    private Collection<ChessMove> queenMovement() {
         List<ChessMove> moves = new ArrayList<>();
         int[][] directions = {
                 {-1, -1}, {-1, 0}, {-1, 1},
@@ -91,7 +91,7 @@ public class ChessPieceCalculator {
             int newRow = row + d[0];
             int newCol = col + d[1];
 
-            while (within_bounds(newRow, newCol)) {
+            while (withinBounds(newRow, newCol)) {
                 ChessPosition newP = new ChessPosition(newRow, newCol);
                 ChessPiece destPiece = board.getPiece(newP);
 
@@ -118,7 +118,7 @@ public class ChessPieceCalculator {
 
 
 
-    private Collection<ChessMove> rook_movement() {
+    private Collection<ChessMove> rookMovement() {
         List<ChessMove> moves = new ArrayList<>();
         int[][] directions = {
                 // Horizontal and Vertical
@@ -131,7 +131,7 @@ public class ChessPieceCalculator {
             int newRow = row + d[0];
             int newCol = col + d[1];
 
-            while (within_bounds(newRow, newCol)) {
+            while (withinBounds(newRow, newCol)) {
                 ChessPosition newP = new ChessPosition(newRow, newCol);
                 ChessPiece destPiece = board.getPiece(newP);
 
@@ -160,7 +160,7 @@ public class ChessPieceCalculator {
 
 
 
-    private Collection<ChessMove> bishop_movement() {
+    private Collection<ChessMove> bishopMovement() {
         List<ChessMove> moves = new ArrayList<>();
         int[][] directions = {
                 {-1, -1}, {-1, 1},
@@ -173,7 +173,7 @@ public class ChessPieceCalculator {
             int newRow = row + d[0];
             int newCol = col + d[1];
 
-            while (within_bounds(newRow, newCol)) {
+            while (withinBounds(newRow, newCol)) {
                 ChessPosition newP = new ChessPosition(newRow, newCol);
                 ChessPiece destPiece = board.getPiece(newP);
 
@@ -201,7 +201,7 @@ public class ChessPieceCalculator {
 
 
 
-    private Collection<ChessMove> knight_movement() {
+    private Collection<ChessMove> knightMovement() {
         List<ChessMove> moves = new ArrayList<>();
         int[][] directions = {
                 {-2,-1}, {-2,1}, {-1, 2}, {-1, -2}, {2, -1}, {2, 1}, {1, 2}, {1, -2}
@@ -214,7 +214,7 @@ public class ChessPieceCalculator {
             int newRow = row + d[0];
             int newCol = col + d[1];
 
-            if (within_bounds(newRow, newCol)) {
+            if (withinBounds(newRow, newCol)) {
                 ChessPosition newP = new ChessPosition(newRow, newCol);
                 ChessPiece destPiece = board.getPiece(newP);
 
@@ -231,7 +231,7 @@ public class ChessPieceCalculator {
 
 
 
-    private Collection<ChessMove> pawn_movement() {
+    private Collection<ChessMove> pawnMovement() {
         // This one will be setup differently due to Pawn's more unique moveset.
         List<ChessMove> moves = new ArrayList<>();
         int row = position.getRow();
@@ -242,7 +242,7 @@ public class ChessPieceCalculator {
         int promotionR = piece.getTeamColor() == ChessGame.TeamColor.WHITE ? 8 : 1;
 
         int newR = row + direction;
-        if (within_bounds(newR, col)) {
+        if (withinBounds(newR, col)) {
             ChessPosition forward = new ChessPosition(newR, col);
 
             if (board.getPiece(forward) == null) {
@@ -271,7 +271,7 @@ public class ChessPieceCalculator {
         for (int i = -1; i <= 1; i += 2) {
             int newCol = col + i;
             int diagR = row + direction;
-            if (within_bounds(diagR, newCol)) {
+            if (withinBounds(diagR, newCol)) {
                 ChessPosition diag = new ChessPosition(diagR, newCol);
                 ChessPiece destPiece = board.getPiece(diag);
                 if (destPiece != null && destPiece.getTeamColor() != piece.getTeamColor()) {
@@ -295,7 +295,7 @@ public class ChessPieceCalculator {
 
 
 
-    private boolean within_bounds(int row, int col) {
+    private boolean withinBounds(int row, int col) {
         // Ensure that the rows and columns do not exceed or go below the scope of the board.
         return row >= 1 && row <=8 && col >= 1 && col <= 8;
     }

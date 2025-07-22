@@ -21,9 +21,9 @@ public class CreateGameHandler {
         try {
             String authToken = request.headers("Authorization");
             CreateGameRequest gamerequest = gson.fromJson(request.body(), CreateGameRequest.class);
-            GameData gameid = createGameService.createGame(gamerequest, authToken);
+            GameData gameID = createGameService.createGame(gamerequest, authToken);
             response.status(200);
-            return gson.toJson(gameid);
+            return gson.toJson(gameID);
         } catch (Exception e) {
             if (e.getMessage().equals("Error: bad request")) {
                 response.status(400);
