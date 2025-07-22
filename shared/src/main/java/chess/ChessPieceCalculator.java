@@ -255,9 +255,7 @@ public class ChessPieceCalculator {
                     moves.add(new ChessMove(position, forward, null));
                     if (row == startingR) {
                         ChessPosition doubleF = new ChessPosition(row + 2 * direction, col);
-                        if (withinBounds(doubleF.getRow(), doubleF.getColumn()) && board.getPiece(doubleF) == null) {
-                            moves.add(new ChessMove(position, doubleF, null));
-                        }
+                        pawn_special_function(doubleF, board, moves);
                     }
                 }
             }
@@ -295,7 +293,11 @@ public class ChessPieceCalculator {
         return row >= 1 && row <=8 && col >= 1 && col <= 8;
     }
 
-
+    private void pawn_special_function(ChessPosition doubleF, ChessBoard board, Collection<ChessMove> moves) {
+        if (withinBounds(doubleF.getRow(), doubleF.getColumn()) && board.getPiece(doubleF) == null) {
+            moves.add(new ChessMove(position, doubleF, null));
+        }
+    }
 
     @Override
     public boolean equals(Object o) {
