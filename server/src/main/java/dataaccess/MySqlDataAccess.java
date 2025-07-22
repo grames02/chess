@@ -55,7 +55,7 @@ public class MySqlDataAccess implements DataAccess {
             throw new DataAccessException("Error Failed to insert user: " + e.getMessage(), e);
         }
     }
-
+    //Pls work.
     @Override
     public void createAuth(AuthData auth) throws DataAccessException {
         String sql = "INSERT INTO authdata (authtoken, username) VALUES (?, ?)";
