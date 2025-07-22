@@ -232,19 +232,16 @@ public class ChessPieceCalculator {
 
 
     private Collection<ChessMove> pawnMovement() {
-        // This one will be setup differently due to Pawn's more unique moveset.
         List<ChessMove> moves = new ArrayList<>();
         int row = position.getRow();
         int col = position.getColumn();
         int direction = piece.getTeamColor() == ChessGame.TeamColor.WHITE ? 1 : -1;
-        //If it's white or black & where it's starting at and what direction it's moving
         int startingR = piece.getTeamColor() == ChessGame.TeamColor.WHITE ? 2 : 7;
         int promotionR = piece.getTeamColor() == ChessGame.TeamColor.WHITE ? 8 : 1;
 
         int newR = row + direction;
         if (withinBounds(newR, col)) {
             ChessPosition forward = new ChessPosition(newR, col);
-
             if (board.getPiece(forward) == null) {
                 if (newR == promotionR) {
                     for (ChessPiece.PieceType promotype : new ChessPiece.PieceType[]{
@@ -258,22 +255,22 @@ public class ChessPieceCalculator {
                     moves.add(new ChessMove(position, forward, null));
                     if (row == startingR) {
                         ChessPosition doubleF = new ChessPosition(row + 2 * direction, col);
-                        if (board.getPiece(doubleF) == null) {
+                        if (withinBounds(doubleF.getRow(), doubleF.getColumn()) && board.getPiece(doubleF) == null) {
                             moves.add(new ChessMove(position, doubleF, null));
                         }
                     }
                 }
             }
         }
-        // Diagonal attacks
+
         for (int i = -1; i <= 1; i += 2) {
             int newCol = col + i;
             int diagR = row + direction;
-            if (!withinBounds(diagR, newCol)) continue;
+            if (!withinBounds(diagR, newCol)) {continue;}
 
             ChessPosition diag = new ChessPosition(diagR, newCol);
             ChessPiece destPiece = board.getPiece(diag);
-            if (destPiece == null || destPiece.getTeamColor() == piece.getTeamColor()) continue;
+            if (destPiece == null || destPiece.getTeamColor() == piece.getTeamColor()) {continue;}
 
             if (diagR == promotionR) {
                 for (ChessPiece.PieceType promotype : new ChessPiece.PieceType[]{
@@ -287,7 +284,7 @@ public class ChessPieceCalculator {
                 moves.add(new ChessMove(position, diag, null));
             }
         }
-        // Promotion
+
         return moves;
     }
 
