@@ -164,7 +164,7 @@ public class DatabaseTests {
                 for (int i = 1; i <= columns; i++) {
                     String value = rs.getString(i);
                     Assertions.assertFalse(value.contains(TEST_USER.getPassword()),
-                            "Found clearAll text password in database");
+                            "Found clear text password in database");
                 }
             }
         }
