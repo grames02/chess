@@ -203,11 +203,7 @@ public class ChessGame {
                 ChessPiece thatPiece = board.getPiece(pieceChecker);
                 if (thatPiece != null && thatPiece.getTeamColor() != teamColor) {
                     Collection<ChessMove> moves = new ChessPieceCalculator(thatPiece, pieceChecker, board).pieceMoveset();
-                    for (ChessMove move : moves) {
-                        if (move.getEndPosition().equals(kingPosition)) {
-                            return true;
-                        }
-                    }
+                    kingChecker(moves, kingPosition);
                 }
             }
         }
@@ -297,7 +293,14 @@ public class ChessGame {
         }
         return null;
     }
-
+    private boolean kingChecker(Collection<ChessMove> moves, ChessPosition kingPosition) {
+        for (ChessMove move : moves) {
+            if (move.getEndPosition().equals(kingPosition)) {
+                return true;
+            }
+        }
+        return false;
+    }
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {

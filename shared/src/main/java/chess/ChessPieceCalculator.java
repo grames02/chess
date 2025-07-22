@@ -232,12 +232,10 @@ public class ChessPieceCalculator {
 
 
     private Collection<ChessMove> pawnMovement() {
-        // This one will be setup differently due to Pawn's more unique moveset.
         List<ChessMove> moves = new ArrayList<>();
         int row = position.getRow();
         int col = position.getColumn();
         int direction = piece.getTeamColor() == ChessGame.TeamColor.WHITE ? 1 : -1;
-        //If it's white or black & where it's starting at and what direction it's moving
         int startingR = piece.getTeamColor() == ChessGame.TeamColor.WHITE ? 2 : 7;
         int promotionR = piece.getTeamColor() == ChessGame.TeamColor.WHITE ? 8 : 1;
 
@@ -254,8 +252,7 @@ public class ChessPieceCalculator {
                             ChessPiece.PieceType.ROOK}) {
                         moves.add(new ChessMove(position, forward, promotype));
                     }
-                }
-                else {
+                } else {
                     moves.add(new ChessMove(position, forward, null));
                     if (row == startingR) {
                         ChessPosition doubleF = new ChessPosition(row + 2 * direction, col);
@@ -264,7 +261,6 @@ public class ChessPieceCalculator {
                         }
                     }
                 }
-
             }
         }
         // Diagonal attacks
@@ -283,15 +279,16 @@ public class ChessPieceCalculator {
                                 ChessPiece.PieceType.ROOK}) {
                             moves.add(new ChessMove(position, diag, promotype));
                         }
+                    } else {
+                        moves.add(new ChessMove(position, diag, null));
                     }
-                    else {
-                    moves.add(new ChessMove(position, diag, null));}
                 }
             }
         }
         // Promotion
         return moves;
     }
+
 
 
 
