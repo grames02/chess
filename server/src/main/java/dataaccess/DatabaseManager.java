@@ -51,7 +51,7 @@ public class DatabaseManager {
             throw new DataAccessException("failed to get connection", ex);
         }
     }
-    // putting in whatever so I can commit & submit.
+
     private static void loadPropertiesFromResources() {
         try (var propStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("db.properties")) {
             if (propStream == null) {
@@ -79,11 +79,6 @@ public class DatabaseManager {
     public static void createTables() {
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement()) {
-
-            // Drop tables if they exist to avoid conflicts (optional but helpful during dev)
-            stmt.executeUpdate("DROP TABLE IF EXISTS authdata;");
-            stmt.executeUpdate("DROP TABLE IF EXISTS games;");
-            stmt.executeUpdate("DROP TABLE IF EXISTS userdata;");
 
             // Create userdata table
             stmt.executeUpdate("""
@@ -113,9 +108,6 @@ public class DatabaseManager {
                 game TEXT
             );
         """);
-
-            System.out.println("Tables created successfully!");
-
         } catch (SQLException | DataAccessException e) {
             System.err.println("Error creating tables: " + e.getMessage());
         }

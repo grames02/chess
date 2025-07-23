@@ -186,14 +186,12 @@ public class MySqlDataAccess implements DataAccess {
              var rs = stmt.executeQuery()) {
             while (rs.next()) {
                 int id = rs.getInt("gameid");
-                String name = rs.getString("gamename");
                 String white = rs.getString("whiteusername");
                 String black = rs.getString("blackusername");
+                String name = rs.getString("gamename");
                 ChessGame game = new Gson().fromJson(rs.getString("game"), ChessGame.class);
                 games.add(new GameData(id, white, black, name, game));
             }
-
-
         } catch (Exception e) {
             throw new DataAccessException("Error Failed to list games: " + e.getMessage(), e);
         }

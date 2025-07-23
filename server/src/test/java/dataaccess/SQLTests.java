@@ -100,6 +100,8 @@ public class SQLTests {
         dao.createGame(new GameData(2, "white", "black", "Game 2", new ChessGame()));
         Collection<GameData> games = dao.listGames();
         assertEquals(2, games.size());
+        System.out.printf(games.toString());
+
     }
 
     @Test
