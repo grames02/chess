@@ -35,17 +35,54 @@ public class ClientUI {
             System.out.print("\nEnter your selection here: ");
             String selection = input.nextLine();
             if (selection.toLowerCase(Locale.ROOT).equals("play game")) {
+                System.out.print("\nPlease enter the game information with the following format:\n" +
+                        "\n<Team Color: W/B> <Game ID>\n");
+                System.out.print("\nEnter Game Information HERE: ");
+                String gameInformation = input.nextLine();
+                String[] gameJoinParts = gameInformation.trim().split(" ");
+                if (gameJoinParts.length != 2) {
+                    System.out.print("Invalid game entry, please try again.");
+                    return;
+                }
+                String playerColor = gameJoinParts[0];
+                int gameId = Integer.parseInt(gameJoinParts[1]);
+                joinGameFunction(playerColor, gameId);
 
             } else if (selection.toLowerCase(Locale.ROOT).equals("create game")) {
+                System.out.print("\nPlease enter a name for the game:" +
+                        "\n<GAME NAME>\n");
+                System.out.print("\nEnter Game Name HERE: ");
+                String gameName = input.nextLine();
+                String[] gameParts = gameName.trim().split(" ");
+                if (gameParts.length != 1) {
+                    System.out.print("Invalid game entry, please try again.");
+                    return;
+                }
+                createGameFunction(gameName);
 
             } else if (selection.toLowerCase(Locale.ROOT).equals("list games")) {
-
-            } else if (selection.toLowerCase(Locale.ROOT).equals("observe game")) {
+                System.out.print("\nHere are the current chess games:\n");
+                listChessGames();
+                // Entering this below so that the user can see the games for a minute before
+                // moving on to the next selection.
+                System.out.print("\nWhen you are ready to return to the main menu, please press ENTER.\n");
+                String done = input.nextLine();
+                System.out.print("\n");
+            }
+            else if (selection.toLowerCase(Locale.ROOT).equals("observe game")) {
 
             } else if (selection.toLowerCase(Locale.ROOT).equals("logout")) {
+                System.out.print("\nYou are now logged out. Sending you back to the home menu.\n");
                 loggedIn = false;
 
             } else if (selection.toLowerCase(Locale.ROOT).equals("help")) {
+                System.out.print("\nYou have selected: HELP.\nHere are further details regarding what each command does:\n");
+                System.out.print("\nPLAY GAME - Select to enter an existing game of chess.\n" +
+                        "CREATE GAME - Select to create a new game of chess.\n" +
+                        "LIST GAMES - Select to see all the current games of chess and their participants.\n" +
+                        "OBSERVE GAME - Select to watch a current game of chess.\n" +
+                        "LOGOUT - Select to logout of your account and return to the home menu.\n" +
+                        "HELP - Select to display these options, as you've so wonderfully done!\n");
                 System.out.print("\nWhen you are ready to return to the main menu, please press ENTER.\n");
                 String done = input.nextLine();
                 System.out.print("\n");
@@ -132,4 +169,30 @@ public class ClientUI {
             System.out.print("Login failed " + e.getMessage());
         }
     }
+
+
+    private void joinGameFunction(String playerColor, int gameId) {
+        try {
+            this.auth = serverFacade.joinGame();
+        } catch (Exception e) {
+            System.out.print("Joining Game Failed " + e.getMessage());
+        }
+    }
+
+    private void listChessGames() {
+        try {
+            this.auth = serverFacade.listGames();
+        } catch (Exception e) {
+            System.out.print("Listing Games Failed " + e.getMessage());
+        }
+    }
+
+    private void createGameFunction(String gameName) {
+        try {
+            this.auth = serverFacade.createGame(gameName);
+        } catch (Exception e) {
+            System.out.print("Game Creation Failed " + e.getMessage());
+        }
+    }
+
 }

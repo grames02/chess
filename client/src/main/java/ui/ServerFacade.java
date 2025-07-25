@@ -66,4 +66,14 @@ public class ServerFacade {
             }
         }
     }
+
+    public AuthData createGame(String gameName) {
+
+    }
+
+    public AuthData listGames() {
+    }
+
+    public AuthData joinGame() {
+    }
 }
