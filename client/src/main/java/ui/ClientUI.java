@@ -53,11 +53,6 @@ public class ClientUI {
                         "\n<GAME NAME>\n");
                 System.out.print("\nEnter Game Name HERE: ");
                 String gameName = input.nextLine();
-                String[] gameParts = gameName.trim().split(" ");
-                if (gameParts.length != 1) {
-                    System.out.print("Invalid game entry, please try again.");
-                    return;
-                }
                 createGameFunction(gameName);
 
             } else if (selection.toLowerCase(Locale.ROOT).equals("list games")) {
@@ -173,7 +168,7 @@ public class ClientUI {
 
     private void joinGameFunction(String playerColor, int gameId) {
         try {
-            this.auth = serverFacade.joinGame();
+            serverFacade.joinGame(auth.authToken(), playerColor, gameId);
         } catch (Exception e) {
             System.out.print("Joining Game Failed " + e.getMessage());
         }
@@ -181,7 +176,7 @@ public class ClientUI {
 
     private void listChessGames() {
         try {
-            this.auth = serverFacade.listGames();
+            serverFacade.listGames(auth.authToken());
         } catch (Exception e) {
             System.out.print("Listing Games Failed " + e.getMessage());
         }
@@ -189,7 +184,7 @@ public class ClientUI {
 
     private void createGameFunction(String gameName) {
         try {
-            this.auth = serverFacade.createGame(gameName);
+            serverFacade.createGame(gameName, auth.authToken());
         } catch (Exception e) {
             System.out.print("Game Creation Failed " + e.getMessage());
         }

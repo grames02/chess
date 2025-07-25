@@ -1,19 +1,17 @@
 package ui;
 
-import model.AuthData;
-import model.LoginRequest;
+import model.*;
 import com.google.gson.Gson;
-import model.RegisterRequest;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Locale;
-import java.util.Scanner;
+import java.util.List;
 
 public class ServerFacade {
     private final String baseUrl;
     private final Gson gson = new Gson();
+
     public ServerFacade(String baseUrl) {
         this.baseUrl = baseUrl;
     }
@@ -35,8 +33,7 @@ public class ServerFacade {
         try (InputStreamReader reader = new InputStreamReader(responseStream)) {
             if (respCode == 200) {
                 return gson.fromJson(reader, AuthData.class);
-            }
-            else {
+            } else {
                 throw new IOException("Login Failed");
             }
         }
@@ -60,20 +57,70 @@ public class ServerFacade {
         try (InputStreamReader reader = new InputStreamReader(responseStream)) {
             if (respCode == 200) {
                 return gson.fromJson(reader, AuthData.class);
-            }
-            else {
+            } else {
                 throw new IOException("Registration Failed");
             }
         }
     }
 
-    public AuthData createGame(String gameName) {
+    public CreateGameResponse createGame(String gameName, String authToken) throws IOException {
+        var createGameReq = new CreateGameRequest(gameName);
+        URL url = new URL(baseUrl + "/game");
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setRequestProperty("Authorization", authToken);
+        connection.setDoOutput(true);
 
+        try (OutputStream os = connection.getOutputStream()) {
+            os.write(gson.toJson(createGameReq).getBytes());
+        }
+        int respCode = connection.getResponseCode();
+        InputStream responseStream = (respCode == 200) ?
+                connection.getInputStream() : connection.getErrorStream();
+
+        try (InputStreamReader reader = new InputStreamReader(responseStream)) {
+            if (respCode == 200) {
+                return gson.fromJson(reader, CreateGameResponse.class);
+            } else {
+                throw new IOException("Game Creation Failed");
+            }
+        }
     }
 
-    public AuthData listGames() {
+    public ListGamesResponse listGames(String authToken) throws IOException {
+        URL url = new URL(baseUrl + "/game");
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+        connection.setRequestProperty("Authorization", authToken);
+        int respCode = connection.getResponseCode();
+        InputStream responseStream = (respCode == 200) ?
+                connection.getInputStream() : connection.getErrorStream();
+
+        try (InputStreamReader reader = new InputStreamReader(responseStream)) {
+            if (respCode == 200) {
+                return gson.fromJson(reader, ListGamesResponse.class);
+            } else {
+                throw new IOException("List Games Failed");
+            }
+        }
     }
 
-    public AuthData joinGame() {
+    public void joinGame(String authToken, String playerColor, int gameId) throws IOException {
+        JoinGameRequest joinGameReq = new JoinGameRequest(playerColor, gameId);
+        URL url = new URL(baseUrl + "/game");
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("PUT");
+        connection.setRequestProperty("Authorization", authToken);
+        connection.setRequestProperty("Content-type", "application/json");
+        connection.setDoOutput(true);
+
+        try (OutputStream os = connection.getOutputStream()) {
+            os.write(gson.toJson(joinGameReq).getBytes());
+        }
+        int respCode = connection.getResponseCode();
+        if (respCode != 200) {
+            throw new IOException("Join Game Failed");
+        }
     }
 }
