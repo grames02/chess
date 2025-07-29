@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class CreateGameService {
     private final DataAccess dataAccess;
-    private static final AtomicInteger GAME_COUNT = new AtomicInteger(1);
     public CreateGameService(DataAccess dataAccess) {
         this.dataAccess = dataAccess;
     }
@@ -22,8 +21,7 @@ public class CreateGameService {
         if (auth == null) {
             throw new DataAccessException("Error: unauthorized");
         }
-        int gameID = GAME_COUNT.getAndIncrement();
-        GameData game = new GameData(gameID, null, null, request.gameName(), null);
+        GameData game = new GameData(0, null, null, request.gameName(), null);
         dataAccess.createGame(game);
         return game;
     }

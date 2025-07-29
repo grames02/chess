@@ -75,15 +75,24 @@ public class MySqlDataAccess implements DataAccess {
 
     @Override
     public void createGame(GameData game) throws DataAccessException {
-        String sql = "INSERT INTO gamedata (gameid, whiteusername, blackusername, gamename, game) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO gamedata (whiteusername, blackusername, gamename, game) VALUES (?, ?, ?, ?)";
         try (var conn = DatabaseManager.getConnection();
-             var stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, game.gameID());
-            stmt.setString(2, game.whiteUsername());
-            stmt.setString(3, game.blackUsername());
-            stmt.setString(4, game.gameName());
-            stmt.setString(5, new Gson().toJson(game.game()));
+             var stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+            stmt.setString(1, game.whiteUsername());
+            stmt.setString(2, game.blackUsername());
+            stmt.setString(3, game.gameName());
+            stmt.setString(4, new Gson().toJson(game.game()));
             stmt.executeUpdate();
+
+            try (var generatedKeys = stmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    int generatedID = generatedKeys.getInt(1);
+                }
+                else {
+                    throw new DataAccessException("Failed to obtain generated Game ID");
+                }
+            }
+
         } catch (Exception e) {
             throw new DataAccessException("Error Failed to insert game: " + e.getMessage(), e);
         }
