@@ -1,7 +1,10 @@
 package ui;
 
 import model.AuthData;
+import model.GameData;
+import model.ListGamesResponse;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
 
@@ -176,8 +179,19 @@ public class ClientUI {
 
     private void listChessGames() {
         try {
-            serverFacade.listGames(auth.authToken());
-        } catch (Exception e) {
+            ListGamesResponse gamesResponse = serverFacade.listGames(auth.authToken());
+            List<GameData> games = gamesResponse.getGames();
+            if (games.isEmpty()) {
+                System.out.print("No games found.");
+            } else {
+                for (GameData game: games) {
+                    System.out.printf("Game ID: %d, White: %s, Black: %s%n",
+                            game.gameID(),
+                            game.whiteUsername() != null ? game.whiteUsername() : "No player",
+                            game.blackUsername() != null ? game.blackUsername() : "No player");
+                }
+
+            }        } catch (Exception e) {
             System.out.print("Listing Games Failed " + e.getMessage());
         }
     }
