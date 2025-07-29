@@ -26,7 +26,7 @@ public class ChessBoardDrawer {
                 int boardCol = fromWhitePerspective ? col : 7 - col;
 
                 boolean isLightSquare = (boardRow + boardCol) % 2 == 0;
-                String bgColor = isLightSquare ? EscapeSequences.SET_BG_COLOR_LIGHT_GREY : EscapeSequences.SET_BG_COLOR_DARK_GREY;
+                String bgColor = isLightSquare ? EscapeSequences.SET_BG_COLOR_DARK_GREY : EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
 
                 String pieceSymbol = getPieceSymbol(board[boardRow][boardCol]);
                 System.out.print(bgColor + pieceSymbol + EscapeSequences.RESET_BG_COLOR);
