@@ -1,5 +1,6 @@
 package ui;
 
+import chess.ChessGame;
 import model.*;
 import com.google.gson.Gson;
 
@@ -8,11 +9,14 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpClient;
 import java.util.List;
 
 public class ServerFacade {
     private final String baseUrl;
     private final Gson gson = new Gson();
+    private final HttpClient httpClient = HttpClient.newHttpClient();
 
     public ServerFacade(String baseUrl) {
         this.baseUrl = baseUrl;
@@ -108,7 +112,7 @@ public class ServerFacade {
         }
     }
 
-    public void joinGame(String authToken, String playerColor, int gameId) throws IOException {
+    public ChessGame joinGame(String authToken, String playerColor, int gameId) throws IOException {
         JoinGameRequest joinGameReq = new JoinGameRequest(playerColor, gameId);
         URL url = new URL(baseUrl + "/game");
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -121,8 +125,13 @@ public class ServerFacade {
             os.write(gson.toJson(joinGameReq).getBytes());
         }
         int respCode = connection.getResponseCode();
-        if (respCode != 200) {
-            throw new IOException("Join Game Failed");
+        InputStream responseStream = (respCode == 200) ? connection.getInputStream() : connection.getErrorStream();
+        try (InputStreamReader reader = new InputStreamReader(responseStream)) {
+            if (respCode == 200) {
+                return gson.fromJson(reader, ChessGame.class);
+            } else {
+                throw new IOException("Join Game Failed");
+            }
         }
     }
 
@@ -142,4 +151,32 @@ public class ServerFacade {
             }
         }
     }
+
+    public char[][] observeGame(String authToken, int gameId) throws Exception {
+        char[][] board = {
+                {'r','n','b','q','k','b','n','r'},
+                {'p','p','p','p','p','p','p','p'},
+                {' ',' ',' ',' ',' ',' ',' ',' '},
+                {' ',' ',' ',' ',' ',' ',' ',' '},
+                {' ',' ',' ',' ',' ',' ',' ',' '},
+                {' ',' ',' ',' ',' ',' ',' ',' '},
+                {'P','P','P','P','P','P','P','P'},
+                {'R','N','B','Q','K','B','N','R'}
+        };
+        return board;
+    }
+
+    public void clearDatabase() throws Exception {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/db"))   // Adjust if your endpoint is different
+                .DELETE()
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 200) {
+            throw new Exception("Failed to clear database: HTTP " + response.statusCode() + " - " + response.body());
+        }
+    }
+
 }

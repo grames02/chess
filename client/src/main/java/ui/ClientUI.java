@@ -1,5 +1,8 @@
 package ui;
 
+import chess.ChessGame;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import model.AuthData;
 import model.GameData;
 import model.ListGamesResponse;
@@ -39,7 +42,7 @@ public class ClientUI {
             String selection = input.nextLine();
             if (selection.toLowerCase(Locale.ROOT).equals("play game")) {
                 System.out.print("\nPlease enter the game information with the following format:\n" +
-                        "\n<Team Color: W/B> <Game ID>\n");
+                        "\n<Team Color: White/Black> <Game ID>\n");
                 System.out.print("\nEnter Game Information HERE: ");
                 String gameInformation = input.nextLine();
                 String[] gameJoinParts = gameInformation.trim().split(" ");
@@ -47,9 +50,15 @@ public class ClientUI {
                     System.out.print("Invalid game entry, please try again.");
                     return;
                 }
+                if (!gameJoinParts[0].toLowerCase(Locale.ROOT).equals("white") && !gameJoinParts[0].toLowerCase(Locale.ROOT).equals("black")) {
+                    System.out.print("Invalid color entry, please try again");
+                    return;
+                }
                 String playerColor = gameJoinParts[0];
                 int gameId = Integer.parseInt(gameJoinParts[1]);
                 joinGameFunction(playerColor, gameId);
+                System.out.print("\nPress ENTER to return to the main menu.\n");
+                input.nextLine();
 
             } else if (selection.toLowerCase(Locale.ROOT).equals("create game")) {
                 System.out.print("\nPlease enter a name for the game:" +
@@ -68,6 +77,19 @@ public class ClientUI {
                 System.out.print("\n");
             }
             else if (selection.toLowerCase(Locale.ROOT).equals("observe game")) {
+                System.out.print("\nPlease enter the game ID to observe:\n");
+                System.out.print("\nEnter Game ID HERE: ");
+                String gameIdStr = input.nextLine();
+                int gameId;
+                try {
+                    gameId = Integer.parseInt(gameIdStr);
+                } catch (NumberFormatException e) {
+                    System.out.print("Invalid game ID. Please enter a number.\n");
+                    return;
+                }
+                observeGameFunction(gameId);
+
+                
 
             } else if (selection.toLowerCase(Locale.ROOT).equals("logout")) {
                 System.out.print("\nYou are now logged out. Sending you back to the home menu.\n");
@@ -90,6 +112,19 @@ public class ClientUI {
                 System.out.print("\n");
             }
         }
+    }
+
+    private void observeGameFunction(int gameId) {
+            try {
+                char[][] boardState = serverFacade.observeGame(auth.authToken(), gameId);
+                boolean fromWhitePerspective = true;
+                ChessBoardDrawer.drawBoard(boardState, fromWhitePerspective);
+                System.out.print("\nPress ENTER to return to the main menu.\n");
+                input.nextLine();
+            } catch (Exception e) {
+                System.out.print("Failed to observe game: " + e.getMessage() + "\n");
+        }
+
     }
 
     private void notLoggedInMenu() {
@@ -173,10 +208,27 @@ public class ClientUI {
     private void joinGameFunction(String playerColor, int gameId) {
         try {
             serverFacade.joinGame(auth.authToken(), playerColor, gameId);
+            drawChessBoard(playerColor);
         } catch (Exception e) {
             System.out.print("Joining Game Failed " + e.getMessage());
         }
     }
+
+    private void drawChessBoard(String playerColor) {
+        char[][] startingBoard = {
+                {'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'},
+                {'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'},
+                {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+                {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+                {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+                {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+                {'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'},
+                {'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'}
+        };
+        boolean fromWhitePerspective = playerColor.equalsIgnoreCase(ChessGame.TeamColor.WHITE.toString());
+        ChessBoardDrawer.drawBoard(startingBoard, fromWhitePerspective);
+    }
+
 
     private void listChessGames() {
         try {
