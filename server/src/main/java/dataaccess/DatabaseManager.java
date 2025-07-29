@@ -104,7 +104,7 @@ public class DatabaseManager {
                 gameid INT PRIMARY KEY AUTO_INCREMENT,
                 whiteusername VARCHAR(255),
                 blackusername VARCHAR(255),
-                gamename VARCHAR(255),
+                gamename VARCHAR(255) UNIQUE,
                 game TEXT
             );
         """);

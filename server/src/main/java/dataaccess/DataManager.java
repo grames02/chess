@@ -3,11 +3,13 @@ import model.*;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class DataManager implements DataAccess {
     private final Map<String, UserData> userList = new HashMap<>();
     private final Map<String, AuthData> authCodes = new HashMap<>();
     private final Map<Integer, GameData> gameList = new HashMap<>();
+    private final AtomicInteger nextGameId = new AtomicInteger(1);
 
     // Clear App.
     public void clearAll() throws DataAccessException {
@@ -33,8 +35,17 @@ public class DataManager implements DataAccess {
         authCodes.put(auth.authToken(), auth);
     }
 
-    public void createGame(GameData game) throws DataAccessException {
-        gameList.put(game.gameID(), game);
+    public GameData createGame(GameData game) throws DataAccessException {
+        int id = game.gameID();
+        if (id <= 0) {
+            id = nextGameId.getAndIncrement();
+        }
+        GameData gameWithId = new GameData(id, game.whiteUsername(), game.blackUsername(), game.gameName(), game.game());
+        if (gameList.containsKey(id)) {
+            throw new DataAccessException("Game already exists with this ID");
+        }
+        gameList.put(id, gameWithId);
+        return gameWithId;
     }
 
     public void updateGame(GameData game) throws DataAccessException {

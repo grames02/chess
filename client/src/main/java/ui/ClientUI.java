@@ -185,11 +185,15 @@ public class ClientUI {
             if (games.isEmpty()) {
                 System.out.print("No games found.");
             } else {
+                int numberedList = 1;
                 for (GameData game: games) {
-                    System.out.printf("Game ID: %d, White: %s, Black: %s%n",
+                    System.out.printf("%d. Game Name: %s, Game ID: %d, White: %s, Black: %s%n",
+                            numberedList,
+                            game.gameName(),
                             game.gameID(),
                             game.whiteUsername() != null ? game.whiteUsername() : "No player",
                             game.blackUsername() != null ? game.blackUsername() : "No player");
+                    numberedList++;
                 }
 
             }        } catch (Exception e) {

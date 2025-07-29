@@ -22,7 +22,6 @@ public class CreateGameService {
             throw new DataAccessException("Error: unauthorized");
         }
         GameData game = new GameData(0, null, null, request.gameName(), null);
-        dataAccess.createGame(game);
-        return game;
+        return dataAccess.createGame(game);
     }
 }

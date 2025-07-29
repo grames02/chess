@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class CreateGameServiceTest {
-
     private CreateGameService createGameService;
     private DataAccess dataAccess;
 
@@ -30,6 +29,12 @@ public class CreateGameServiceTest {
 
         assertNotNull(createdGame);
         assertEquals("MyGame", createdGame.gameName());
+        GameData fromDb = dataAccess.listGames().stream()
+                .filter(g -> "MyGame".equals(g.gameName()))
+                .findFirst()
+                .orElse(null);
+        assertNotNull(fromDb);
+        assertEquals("MyGame", fromDb.gameName());
     }
 
     @Test

@@ -15,7 +15,7 @@ public interface DataAccess {
 
     void createAuth(AuthData auth) throws DataAccessException;
 
-    void createGame(GameData game) throws DataAccessException;
+    GameData createGame(GameData game) throws DataAccessException;
 
     void updateGame(GameData game) throws DataAccessException;
 

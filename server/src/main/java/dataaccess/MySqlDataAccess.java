@@ -74,27 +74,38 @@ public class MySqlDataAccess implements DataAccess {
     }
 
     @Override
-    public void createGame(GameData game) throws DataAccessException {
-        String sql = "INSERT INTO gamedata (whiteusername, blackusername, gamename, game) VALUES (?, ?, ?, ?)";
-        try (var conn = DatabaseManager.getConnection();
-             var stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
-            stmt.setString(1, game.whiteUsername());
-            stmt.setString(2, game.blackUsername());
-            stmt.setString(3, game.gameName());
-            stmt.setString(4, new Gson().toJson(game.game()));
-            stmt.executeUpdate();
+    public GameData createGame(GameData game) throws DataAccessException {
+        String checkSql = "SELECT COUNT(*) FROM gamedata WHERE gamename = ?";
+        String insertSql = "INSERT INTO gamedata (whiteusername, blackusername, gamename, game) VALUES (?, ?, ?, ?)";
 
-            try (var generatedKeys = stmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    int generatedID = generatedKeys.getInt(1);
-                }
-                else {
-                    throw new DataAccessException("Failed to obtain generated Game ID");
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var checkStmt = conn.prepareStatement(checkSql)) {
+                checkStmt.setString(1, game.gameName());
+                try (var rs = checkStmt.executeQuery()) {
+                    if (rs.next() && rs.getInt(1) > 0) {
+                        throw new DataAccessException("Game name already exists");
+                    }
                 }
             }
+            try (var insertStmt = conn.prepareStatement(insertSql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+                insertStmt.setString(1, game.whiteUsername());
+                insertStmt.setString(2, game.blackUsername());
+                insertStmt.setString(3, game.gameName());
+                insertStmt.setString(4, new Gson().toJson(game.game()));
 
+                insertStmt.executeUpdate();
+
+                try (var generatedKeys = insertStmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        int generatedID = generatedKeys.getInt(1);
+                        return new GameData(generatedID, game.whiteUsername(), game.blackUsername(), game.gameName(), game.game());
+                    } else {
+                        throw new DataAccessException("Failed to obtain generated Game ID");
+                    }
+                }
+            }
         } catch (Exception e) {
-            throw new DataAccessException("Error Failed to insert game: " + e.getMessage(), e);
+            throw new DataAccessException("Error inserting game: " + e.getMessage(), e);
         }
     }
 

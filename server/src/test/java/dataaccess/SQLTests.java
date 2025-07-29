@@ -3,6 +3,8 @@ package dataaccess;
 import chess.ChessGame;
 import model.*;
 import org.junit.jupiter.api.*;
+
+import java.time.DateTimeException;
 import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -85,9 +87,12 @@ public class SQLTests {
     @Test
     void createGetGameTestGood() throws DataAccessException {
         ChessGame game = new ChessGame();
-        GameData gameData = new GameData(1, "white", "black", "chess_game", game);
+        GameData gameData = new GameData(0, "white", "black", "chess_game", game);
         dao.createGame(gameData);
-        GameData fromDb = dao.getGame(1);
+        GameData fromDb = dao.listGames().stream()
+                        .filter(g -> "chess_game".equals(g.gameName()))
+                                .findFirst()
+                                        .orElse(null);
         assertNotNull(fromDb);
         assertEquals("chess_game", fromDb.gameName());
         assertEquals("white", fromDb.whiteUsername());
@@ -107,11 +112,15 @@ public class SQLTests {
     @Test
     void updateGamePositive() throws DataAccessException {
         ChessGame game = new ChessGame();
-        GameData og = new GameData(2, "white", "black", "og", game);
+        GameData og = new GameData(0, "white", "black", "og", game);
         dao.createGame(og);
-        GameData updated = new GameData(2, "white", "black", "new name", game);
+        GameData inserted = dao.listGames().stream()
+                .filter(g -> "og".equals(g.gameName()))
+                .findFirst()
+                .orElseThrow(() -> new DataAccessException("Game not found after insert"));
+        GameData updated = new GameData(inserted.gameID(), "white", "black", "new name", game);
         dao.updateGame(updated);
-        GameData fromDb = dao.getGame(2);
+        GameData fromDb = dao.getGame(inserted.gameID());
         assertEquals("new name", fromDb.gameName());
     }
 
@@ -142,9 +151,16 @@ public class SQLTests {
 
     @Test
     void duplicateGame() throws DataAccessException {
-        GameData game = new GameData(20, "w", "b", "Game_time", new ChessGame());
-        dao.createGame(game);
-        assertThrows(DataAccessException.class, () -> dao.createGame(game));
+        ChessGame game = new ChessGame();
+        GameData gameData = new GameData(0, "w", "b", "Game_time", game);
+        dao.createGame(gameData);
+        GameData inserted = dao.listGames().stream()
+                .filter(g -> "Game_time".equals(g.gameName()))
+                .findFirst()
+                .orElseThrow(() -> new DataAccessException("Game not found after insert"));
+        assertThrows(DataAccessException.class, () -> {
+            dao.createGame(new GameData(0, "w", "b", "Game_time", game));
+        });
     }
 
     @Test
