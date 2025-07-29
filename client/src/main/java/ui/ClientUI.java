@@ -71,6 +71,7 @@ public class ClientUI {
 
             } else if (selection.toLowerCase(Locale.ROOT).equals("logout")) {
                 System.out.print("\nYou are now logged out. Sending you back to the home menu.\n");
+                loggedOutFunction();
                 loggedIn = false;
 
             } else if (selection.toLowerCase(Locale.ROOT).equals("help")) {
@@ -193,6 +194,14 @@ public class ClientUI {
 
             }        } catch (Exception e) {
             System.out.print("Listing Games Failed " + e.getMessage());
+        }
+    }
+
+    private void loggedOutFunction() {
+        try {
+            serverFacade.logout(auth.authToken());
+        } catch (Exception e) {
+            System.out.print("Logout failed " + e.getMessage());
         }
     }
 

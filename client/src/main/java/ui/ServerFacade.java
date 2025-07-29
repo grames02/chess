@@ -5,7 +5,9 @@ import com.google.gson.Gson;
 
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
+import java.net.http.HttpRequest;
 import java.util.List;
 
 public class ServerFacade {
@@ -121,6 +123,23 @@ public class ServerFacade {
         int respCode = connection.getResponseCode();
         if (respCode != 200) {
             throw new IOException("Join Game Failed");
+        }
+    }
+
+    public void logout(String authToken) throws IOException {
+        URL url = new URL(baseUrl + "/session");
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("DELETE");
+        connection.setRequestProperty("Authorization", authToken);
+        connection.connect();
+        int respCode = connection.getResponseCode();
+        InputStream responseStream = (respCode == 200) ?
+                connection.getInputStream() : connection.getErrorStream();
+        try (InputStreamReader reader = new InputStreamReader(responseStream)) {
+            if (respCode != 200) {
+                var errorResponse = new BufferedReader(reader).readLine();
+                throw new IOException("Logout Failed: " + errorResponse);
+            }
         }
     }
 }
