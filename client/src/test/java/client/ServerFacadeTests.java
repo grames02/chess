@@ -129,4 +129,13 @@ public class ServerFacadeTests {
         });
         assertTrue(exception.getMessage().toLowerCase().contains("unauthorized") || exception.getMessage().toLowerCase().contains("token"));
     }
+
+    @Test
+    public void testListGamesInvalidToken() {
+        Exception exception = assertThrows(Exception.class, () -> {
+            facade.listGames("invalidtoken");
+        });
+        String msg = exception.getMessage().toLowerCase();
+        assertTrue(msg.contains("failed") || msg.contains("unauthorized") || msg.contains("token"));
+    }
 }
