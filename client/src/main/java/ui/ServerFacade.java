@@ -112,8 +112,14 @@ public class ServerFacade {
         }
     }
 
-    public ChessGame joinGame(String authToken, String playerColor, int gameId) throws IOException {
-        JoinGameRequest joinGameReq = new JoinGameRequest(playerColor, gameId);
+    public ChessGame joinGame(String authToken, String playerColor, int gameNumber) throws IOException {
+        ListGamesResponse listResponse = listGames(authToken);
+        if (gameNumber <= 0 || gameNumber > listResponse.getGames().size()) {
+            throw new IOException("Invalid game number");
+        }
+        int gameID = listResponse.getGames().get(gameNumber - 1).gameID();
+
+        JoinGameRequest joinGameReq = new JoinGameRequest(playerColor, gameID);
         URL url = new URL(baseUrl + "/game");
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("PUT");
@@ -124,6 +130,7 @@ public class ServerFacade {
         try (OutputStream os = connection.getOutputStream()) {
             os.write(gson.toJson(joinGameReq).getBytes());
         }
+
         int respCode = connection.getResponseCode();
         InputStream responseStream = (respCode == 200) ? connection.getInputStream() : connection.getErrorStream();
         try (InputStreamReader reader = new InputStreamReader(responseStream)) {
@@ -152,8 +159,14 @@ public class ServerFacade {
         }
     }
 
-    public char[][] observeGame(String authToken, int gameId) throws Exception {
-        char[][] board = {
+    public char[][] observeGame(String authToken, int gameNumber) throws IOException {
+        ListGamesResponse listResponse = listGames(authToken);
+        if (gameNumber <= 0 || gameNumber > listResponse.getGames().size()) {
+            throw new IOException("Invalid game number");
+        }
+
+        listResponse.getGames().get(gameNumber - 1);
+        return new char[][]{
                 {'r','n','b','q','k','b','n','r'},
                 {'p','p','p','p','p','p','p','p'},
                 {' ',' ',' ',' ',' ',' ',' ',' '},
@@ -163,12 +176,10 @@ public class ServerFacade {
                 {'P','P','P','P','P','P','P','P'},
                 {'R','N','B','Q','K','B','N','R'}
         };
-        return board;
     }
-
     public void clearDatabase() throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl + "/db"))   // Adjust if your endpoint is different
+                .uri(URI.create(baseUrl + "/db"))
                 .DELETE()
                 .build();
 

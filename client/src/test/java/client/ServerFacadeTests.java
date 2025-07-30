@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessGame;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -99,22 +100,27 @@ public class ServerFacadeTests {
 
     @Test
     public void testJoinGameSuccess() throws Exception {
-        AuthData authData = facade.register("player6", "password", "p6@email.com");
-        facade.createGame("Join Test Game", authData.authToken());
-        ListGamesResponse response = facade.listGames(authData.authToken());
-        int gameId = response.getGames().get(0).gameID();
-        facade.joinGame(authData.authToken(), "White", gameId);
+        AuthData authData = facade.register("joinUser", "password", "join@example.com");
+        facade.createGame("Test Join Game", authData.authToken());
+        ListGamesResponse listResponse = facade.listGames(authData.authToken());
+        assertFalse(listResponse.getGames().isEmpty(), "Game list should not be empty");
+        int gameNumber = 1;
+        ChessGame game = facade.joinGame(authData.authToken(), "white", gameNumber);
+        assertNotNull(game);
     }
 
     @Test
-    public void testJoinGameInvalidGameId() throws Exception {
+    public void testJoinGameInvalidGameNumber() throws Exception {
         AuthData authData = facade.register("player7", "password", "p7@email.com");
+        int invalidGameNumber = 999;
         Exception exception = assertThrows(Exception.class, () -> {
-            facade.joinGame(authData.authToken(), "White", -999);
+            facade.joinGame(authData.authToken(), "White", invalidGameNumber);
         });
         System.out.println("Exception message: " + exception.getMessage());
-        assertTrue(exception.getMessage().toLowerCase().contains("failed"));
+        assertTrue(exception.getMessage().toLowerCase().contains("invalid game number") ||
+                exception.getMessage().toLowerCase().contains("failed"));
     }
+
 
     @Test
     public void testLogoutSuccess() throws Exception {

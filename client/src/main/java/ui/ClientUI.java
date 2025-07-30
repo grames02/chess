@@ -13,6 +13,7 @@ import java.util.Scanner;
 
 public class ClientUI {
     private final ServerFacade serverFacade;
+    private List<GameData> currentGamesList;
     private Scanner input;
     private boolean loggedIn = false;
     private boolean quitProgram = false;
@@ -42,7 +43,7 @@ public class ClientUI {
             String selection = input.nextLine();
             if (selection.toLowerCase(Locale.ROOT).equals("play game")) {
                 System.out.print("\nPlease enter the game information with the following format:\n" +
-                        "\n<Team Color: White/Black> <Game ID>\n");
+                        "\n<Team Color: White/Black> <Game Number>\n");
                 System.out.print("\nEnter Game Information HERE: ");
                 String gameInformation = input.nextLine();
                 String[] gameJoinParts = gameInformation.trim().split(" ");
@@ -77,14 +78,14 @@ public class ClientUI {
                 System.out.print("\n");
             }
             else if (selection.toLowerCase(Locale.ROOT).equals("observe game")) {
-                System.out.print("\nPlease enter the game ID to observe:\n");
-                System.out.print("\nEnter Game ID HERE: ");
+                System.out.print("\nPlease enter the game number to observe:\n");
+                System.out.print("\nEnter Game Number HERE: ");
                 String gameIdStr = input.nextLine();
                 int gameId;
                 try {
                     gameId = Integer.parseInt(gameIdStr);
                 } catch (NumberFormatException e) {
-                    System.out.print("Invalid game ID. Please enter a number.\n");
+                    System.out.print("Invalid game number. Please enter a valid number.\n");
                     return;
                 }
                 observeGameFunction(gameId);
@@ -239,10 +240,9 @@ public class ClientUI {
             } else {
                 int numberedList = 1;
                 for (GameData game: games) {
-                    System.out.printf("%d. Game Name: %s, Game ID: %d, White: %s, Black: %s%n",
+                    System.out.printf("%d. Game Name: %s, White: %s, Black: %s%n",
                             numberedList,
                             game.gameName(),
-                            game.gameID(),
                             game.whiteUsername() != null ? game.whiteUsername() : "No player",
                             game.blackUsername() != null ? game.blackUsername() : "No player");
                     numberedList++;
