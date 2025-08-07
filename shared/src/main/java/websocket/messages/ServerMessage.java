@@ -16,11 +16,13 @@ public class ServerMessage {
     private GameData game;
     private String errorMessage;
     private String message;
+    private char[][] board;
 
     public enum ServerMessageType {
         LOAD_GAME,
         ERROR,
-        NOTIFICATION
+        NOTIFICATION,
+        BOARD_UPDATE
     }
 
     public ServerMessage(ServerMessageType type, GameData game) {
@@ -34,6 +36,13 @@ public class ServerMessage {
             this.errorMessage = message;
         } else if (type == ServerMessageType.NOTIFICATION) {
             this.message = message;
+        }
+    }
+
+    public ServerMessage(ServerMessageType type, char[][] board) {
+        this.serverMessageType = type;
+        if (type == ServerMessageType.BOARD_UPDATE) {
+            this.board = board;
         }
     }
 

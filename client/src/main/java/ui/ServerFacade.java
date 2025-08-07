@@ -14,6 +14,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpClient;
 import java.util.List;
+import chess.*;
 
 public class ServerFacade {
     private ChessWebSocketCLIENT webSocket;
@@ -181,19 +182,27 @@ public class ServerFacade {
         if (gameNumber <= 0 || gameNumber > listResponse.getGames().size()) {
             throw new IOException("Invalid game number");
         }
+        int gameID = listResponse.getGames().get(gameNumber - 1).gameID();
 
-        listResponse.getGames().get(gameNumber - 1);
-        return new char[][]{
-                {'r','n','b','q','k','b','n','r'},
-                {'p','p','p','p','p','p','p','p'},
-                {' ',' ',' ',' ',' ',' ',' ',' '},
-                {' ',' ',' ',' ',' ',' ',' ',' '},
-                {' ',' ',' ',' ',' ',' ',' ',' '},
-                {' ',' ',' ',' ',' ',' ',' ',' '},
-                {'P','P','P','P','P','P','P','P'},
-                {'R','N','B','Q','K','B','N','R'}
-        };
+        URL url = new URL(baseUrl + "/game/" + gameID);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+        connection.setRequestProperty("Authorization", authToken);
+        int respCode = connection.getResponseCode();
+        InputStream responseStream = (respCode == 200) ?
+                connection.getInputStream() : connection.getErrorStream();
+
+        try (InputStreamReader reader = new InputStreamReader(responseStream)) {
+            if (respCode == 200) {
+                GameData gameData = gson.fromJson(reader, GameData.class);
+                ChessGame game = convertGameDataToChessGame(gameData);
+                return convertBoardToCharArray(game.getBoard());
+            } else {
+                throw new IOException("Observe Game Failed");
+            }
+        }
     }
+
     public void clearDatabase() throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "/db"))
@@ -207,7 +216,79 @@ public class ServerFacade {
         }
     }
 
-    public void makeMove(String authToken, int gameId, ChessPosition start, ChessPosition end) throws Exception {
+    public char[][] makeMove(String authToken, int gameId, ChessPosition start, ChessPosition end) throws Exception {
+        MakeMoveRequest moveRequest = new MakeMoveRequest(authToken, gameId, new ChessMove(start, end, null));
+        URL url = new URL(baseUrl + "/game/" + gameId + "/move");
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty("Authorization", authToken);
+        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setDoOutput(true);
 
+        try (OutputStream os = connection.getOutputStream()) {
+            os.write(gson.toJson(moveRequest).getBytes());
+        }
+
+        int respCode = connection.getResponseCode();
+        InputStream responseStream = (respCode == 200) ?
+                connection.getInputStream() : connection.getErrorStream();
+
+        try (InputStreamReader reader = new InputStreamReader(responseStream)) {
+            if (respCode == 200) {
+                // Assuming server returns updated board state as char[][]
+                return gson.fromJson(reader, char[][].class);
+            } else {
+                throw new IOException("Make Move Failed");
+            }
+        }
+    }
+
+    public ChessGame convertGameDataToChessGame(GameData gameData) {
+        // Minimal example conversion. This must be adjusted based on actual GameData and ChessGame classes.
+        ChessGame game = new ChessGame();
+        // Assume gameData contains board info, etc. This needs proper implementation.
+        // For now, just return empty game
+        return game;
+    }
+
+    public ChessWebSocketCLIENT getWebSocket() {
+        return webSocket;
+    }
+
+    public Gson getGson() {
+        return gson;
+    }
+
+    public static char[][] convertBoardToCharArray(ChessBoard board) {
+        char[][] boardChars = new char[8][8];
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPosition pos = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(pos);
+                if (piece == null) {
+                    boardChars[row - 1][col - 1] = ' ';  // empty square
+                } else {
+                    boardChars[row - 1][col - 1] = pieceToChar(piece);
+                }
+            }
+        }
+        return boardChars;
+    }
+
+    private static char pieceToChar(ChessPiece piece) {
+        char c;
+        switch (piece.getPieceType()) {
+            case PAWN: c = 'p'; break;
+            case ROOK: c = 'r'; break;
+            case KNIGHT: c = 'n'; break;
+            case BISHOP: c = 'b'; break;
+            case QUEEN: c = 'q'; break;
+            case KING: c = 'k'; break;
+            default: c = ' '; break;
+        }
+        if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+            c = Character.toUpperCase(c);
+        }
+        return c;
     }
 }

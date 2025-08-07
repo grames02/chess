@@ -1,5 +1,6 @@
 package websocket;
 
+import chess.ChessGame;
 import chess.ChessMove;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
@@ -77,10 +78,76 @@ public class ChessWebSocket {
 
             }
             else if (gameCommand.getCommandType().equals(UserGameCommand.CommandType.MAKE_MOVE)) {
-                // I could implement the request that the user made in the UI. Passing that variable into here.
-                // That variable will be requestedMove.
+                int gameId = gameCommand.getGameID();
+                String authToken = gameCommand.getAuthToken();
+                AuthData auth = dataAccess.getAuth(authToken);
 
+                if (auth == null) {
+                    ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "ERROR. Invalid authToken.");
+                    session.getRemote().sendString(gson.toJson(error));
+                    return;
+                }
+
+                GameData fullGame = dataAccess.getGame(gameId);
+                if (fullGame == null) {
+                    ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "ERROR. Invalid game.");
+                    session.getRemote().sendString(gson.toJson(error));
+                    return;
+                }
+
+                ChessGame game = fullGame.game();
+
+                // Check if it is the player's turn
+                String currentTurn = game.getTeamTurn().name(); // Assuming currentTurn() returns TeamColor enum (WHITE or BLACK)
+
+                // Determine player's team color by username
+                String playerTeam;
+                if (auth.username().equals(fullGame.whiteUsername())) {
+                    playerTeam = "WHITE";
+                } else if (auth.username().equals(fullGame.blackUsername())) {
+                    playerTeam = "BLACK";
+                } else {
+                    // Player not part of this game
+                    ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "ERROR. Player not in game.");
+                    session.getRemote().sendString(gson.toJson(error));
+                    return;
+                }
+
+                if (!currentTurn.equals(playerTeam)) {
+                    ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "ERROR. Not your turn.");
+                    session.getRemote().sendString(gson.toJson(error));
+                    return;
+                }
+
+                ChessMove move = gameCommand.getMove();
+
+                var validMoves = game.validMoves(move.getStartPosition());
+                if (!validMoves.contains(move)) {
+                    ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "ERROR. Invalid move.");
+                    session.getRemote().sendString(gson.toJson(error));
+                    return;
+                }
+
+                game.makeMove(move);
+                dataAccess.updateGame(fullGame);
+
+                ServerMessage loadGame = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, fullGame);
+
+                for (Session s : gameSessions.get(gameId)) {
+                    if (s.isOpen()) {
+                        s.getRemote().sendString(gson.toJson(loadGame));
+                    }
+                }
+                ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+                        auth.username() + " made a move.");
+                for (Session s : gameSessions.get(gameId)) {
+                    if (!s.equals(session) && s.isOpen()) {
+                        s.getRemote().sendString(gson.toJson(notification));
+                    }
+                }
             }
+
+
             else if (gameCommand.getCommandType().equals(UserGameCommand.CommandType.RESIGN)) {
 
             }

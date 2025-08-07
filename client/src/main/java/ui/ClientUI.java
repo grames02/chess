@@ -4,7 +4,6 @@ import chess.*;
 import model.AuthData;
 import model.GameData;
 import model.ListGamesResponse;
-import model.MakeMoveRequest;
 import websocket.commands.UserGameCommand;
 
 import java.util.List;
@@ -19,6 +18,9 @@ public class ClientUI {
     private boolean quitProgram = false;
     private boolean gameplayMode = false;
     private AuthData auth;
+    private ChessWebSocketCLIENT webSocketCLIENT;
+    private boolean fromWhitePerspective;
+    private int currentGameId;
 
     public ClientUI(ServerFacade serverFacade) {
         this.serverFacade = serverFacade;
@@ -36,74 +38,67 @@ public class ClientUI {
     }
 
     private void gameplayMenu() {
-       while (gameplayMode) {
-           System.out.print("\nTime to play Chess! Please enter one of the options below:\n" +
-                   "\nMAKE MOVE" + "\nREDRAW CHESS BOARD" + "\nHIGHLIGHT LEGAL MOVES" +
-                   "\nRESIGN" + "\nLEAVE" + "\nHELP\n");
-           System.out.print("\nEnter your selection here: ");
-           String selection = input.nextLine();
+        while (gameplayMode) {
+            System.out.print("\nTime to play Chess! Please enter one of the options below:\n" +
+                    "\nMAKE MOVE" + "\nREDRAW CHESS BOARD" + "\nHIGHLIGHT LEGAL MOVES" +
+                    "\nRESIGN" + "\nLEAVE" + "\nHELP\n");
+            System.out.print("\nEnter your selection here: ");
+            String selection = input.nextLine();
 
-           if (selection.toLowerCase(Locale.ROOT).equals("make move")) {
-               System.out.print("\nMake your move with the following format\n<Start Position> <End Position>\n");
-               System.out.print("\nEnter your selection here: ");
-               String move = input.nextLine();
-               String[] parts = move.trim().split(" ");
-               if (parts.length != 2) {
-                   System.out.print("\nInvalid Move. Please try again.");
-                   continue;
-               }
-               ChessPosition start = ChessPosition.positionInterpreter(parts[0]);
-               ChessPosition end = ChessPosition.positionInterpreter(parts[1]);
+            if (selection.toLowerCase(Locale.ROOT).equals("make move")) {
+                System.out.print("\nMake your move with the following format\n<Start Position> <End Position>\n");
+                System.out.print("\nEnter your selection here: ");
+                String move = input.nextLine();
+                String[] parts = move.trim().split(" ");
+                if (parts.length != 2) {
+                    System.out.print("\nInvalid Move. Please try again.");
+                    continue;
+                }
+                ChessPosition start = ChessPosition.positionInterpreter(parts[0]);
+                ChessPosition end = ChessPosition.positionInterpreter(parts[1]);
 
-               try {
-//                   MakeMoveRequest moveRequest = new MakeMoveRequest(auth.authToken(), gameId, new ChessMove(start, end, null));
-//                   String json = gson.toJson(moveRequest);
-//                   serverFacade.getWebSocket().send(json);
-//                   char[][] updatedBoard = serverFacade.makeMove(auth.authToken(), int gameId, start, end);
-               } catch (Exception e) {
-                   System.out.print("Move failed.");
-               }
-           }
+                try {
+                    // Implement making a move using WebSocket or serverFacade here
+                } catch (Exception e) {
+                    System.out.print("Move failed.");
+                }
+            }
 
-           else if (selection.toLowerCase(Locale.ROOT).equals("redraw chess board")) {
+            else if (selection.toLowerCase(Locale.ROOT).equals("redraw chess board")) {
+                // Redraw current chess board - you can implement as needed
+            }
 
-           }
+            else if (selection.toLowerCase(Locale.ROOT).equals("highlight legal moves")) {
+                // Implement highlight legal moves here
+            }
 
-           else if (selection.toLowerCase(Locale.ROOT).equals("highlight legal moves")) {
+            else if (selection.toLowerCase(Locale.ROOT).equals("resign")) {
+                // Implement resign logic here
+            }
 
-           }
+            else if (selection.toLowerCase(Locale.ROOT).equals("leave")) {
+                System.out.print("\nYou have left the game.");
+                gameplayMode = false;
+            }
 
-           else if (selection.toLowerCase(Locale.ROOT).equals("resign")) {
-               // Declare one of the players the winner. Does NOT kick players out of the game.
+            else if (selection.toLowerCase(Locale.ROOT).equals("help")) {
+                System.out.print("\nYou have selected: HELP.\nHere are further details regarding what each command does:\n");
+                System.out.print("\nMAKE MOVE - Select to move one of your chess pieces.\n" +
+                        "REDRAW CHESS BOARD - Select to have the current chess board drawn again.\n" +
+                        "HIGHLIGHT LEGAL MOVES - Select to see all potential moves a certain piece can make.\n" +
+                        "RESIGN - Select to surrender in the current game of chess.\n" +
+                        "LEAVE - Select to leave the current game of chess.\n" +
+                        "HELP - Select to display these options, as you've so wonderfully done!\n");
+                System.out.print("\nWhen you are ready to return to the selection screen, please press ENTER.\n");
+                input.nextLine();
+                System.out.print("\n");
+            }
 
-           }
-
-           else if (selection.toLowerCase(Locale.ROOT).equals("leave")) {
-               System.out.print("\nYou have left the game.");
-               // Implement something here where their player ID is removed from this current game.
-               // The game should also end at this point.
-
-               gameplayMode = false;
-           }
-
-           else if (selection.toLowerCase(Locale.ROOT).equals("help")) {
-               System.out.print("\nYou have selected: HELP.\nHere are further details regarding what each command does:\n");
-               System.out.print("\nMAKE MOVE - Select to move one of your chess pieces.\n" +
-                       "REDRAW CHESS BOARD - Select to have the current chess board drawn again.\n" +
-                       "HIGHLIGHT LEGAL MOVES - Select to see all potential moves a certain piece can make.\n" +
-                       "RESIGN - Select to surrender in the current game of chess.\n" +
-                       "LEAVE - Select to leave the current game of chess.\n" +
-                       "HELP - Select to display these options, as you've so wonderfully done!\n");
-               System.out.print("\nWhen you are ready to return to the selection screen, please press ENTER.\n");
-               String done = input.nextLine();
-               System.out.print("\n");
-           }
-
-           else {
-               System.out.print("\nInvalid Response. Please Try Again.\n");
-               System.out.print("\n");
-           }
-       }
+            else {
+                System.out.print("\nInvalid Response. Please Try Again.\n");
+                System.out.print("\n");
+            }
+        }
     }
 
     private void loggedInMenu() {
@@ -124,23 +119,37 @@ public class ClientUI {
                     System.out.print("Invalid game entry, please try again.");
                     return;
                 }
-                if (!gameJoinParts[0].toLowerCase(Locale.ROOT).equals("white") && !gameJoinParts[0].toLowerCase(Locale.ROOT).equals("black")) {
+                String playerColor = gameJoinParts[0];
+                if (!playerColor.equalsIgnoreCase("white") && !playerColor.equalsIgnoreCase("black")) {
                     System.out.print("Invalid color entry, please try again");
                     return;
                 }
-                String playerColor = gameJoinParts[0];
-                int gameId = Integer.parseInt(gameJoinParts[1]);
+
+                int gameNumber;
+                try {
+                    gameNumber = Integer.parseInt(gameJoinParts[1]);
+                } catch (NumberFormatException e) {
+                    System.out.print("Invalid game number, please try again.");
+                    return;
+                }
+
+                if (currentGamesList == null || gameNumber < 1 || gameNumber > currentGamesList.size()) {
+                    System.out.print("Invalid game number, please try again.");
+                    return;
+                }
+
+                int gameId = currentGamesList.get(gameNumber - 1).gameID();
+
                 joinGameFunction(playerColor, gameId);
 
-                // Insert in code to connect to the Websocket here.
+                // Connect to websocket and start gameplay mode here (not fully shown)
+
                 try {
                     String serverUrl = "ws://localhost:8080/ws";
                     ChessWebSocketCLIENT webSocketCLIENT = new ChessWebSocketCLIENT(serverUrl);
                     System.out.print("Successfully connected to web socket.");
                     gameplayMode = true;
                     gameplayMenu();
-                    UserGameCommand connectCommand = new UserGameCommand(UserGameCommand.CommandType.CONNECT, auth.authToken(), gameId);
-
                 } catch (Exception e) {
                     System.err.print("Failed to connect to WebSocket" + e.getMessage());
                 }
@@ -155,30 +164,34 @@ public class ClientUI {
             } else if (selection.toLowerCase(Locale.ROOT).equals("list games")) {
                 System.out.print("\nHere are the current chess games:\n");
                 listChessGames();
-                // Entering this below so that the user can see the games for a minute before
-                // moving on to the next selection.
                 System.out.print("\nWhen you are ready to return to the main menu, please press ENTER.\n");
-                String done = input.nextLine();
+                input.nextLine();
                 System.out.print("\n");
             }
             else if (selection.toLowerCase(Locale.ROOT).equals("observe game")) {
                 System.out.print("\nPlease enter the game number to observe:\n");
                 System.out.print("\nEnter Game Number HERE: ");
-                String gameIdStr = input.nextLine();
-                int gameId;
+                String gameNumberStr = input.nextLine();
+
+                int gameNumber;
                 try {
-                    gameId = Integer.parseInt(gameIdStr);
+                    gameNumber = Integer.parseInt(gameNumberStr);
                 } catch (NumberFormatException e) {
                     System.out.print("Invalid game number. Please enter a valid number.\n");
                     return;
                 }
+
+                if (currentGamesList == null || gameNumber < 1 || gameNumber > currentGamesList.size()) {
+                    System.out.print("Invalid game number, please try again.");
+                    return;
+                }
+
+                int gameId = currentGamesList.get(gameNumber - 1).gameID();
+
                 observeGameFunction(gameId);
-
-
 
             } else if (selection.toLowerCase(Locale.ROOT).equals("logout")) {
                 System.out.print("\nYou are now logged out. Sending you back to the home menu.\n");
-                loggedOutFunction();
                 loggedIn = false;
 
             } else if (selection.toLowerCase(Locale.ROOT).equals("help")) {
@@ -190,7 +203,7 @@ public class ClientUI {
                         "LOGOUT - Select to logout of your account and return to the home menu.\n" +
                         "HELP - Select to display these options, as you've so wonderfully done!\n");
                 System.out.print("\nWhen you are ready to return to the main menu, please press ENTER.\n");
-                String done = input.nextLine();
+                input.nextLine();
                 System.out.print("\n");
             } else {
                 System.out.print("\nInvalid Response. Please Try Again.\n");
@@ -200,16 +213,15 @@ public class ClientUI {
     }
 
     private void observeGameFunction(int gameId) {
-            try {
-                char[][] boardState = serverFacade.observeGame(auth.authToken(), gameId);
-                boolean fromWhitePerspective = true;
-                ChessBoardDrawer.drawBoard(boardState, fromWhitePerspective);
-                System.out.print("\nPress ENTER to return to the main menu.\n");
-                input.nextLine();
-            } catch (Exception e) {
-                System.out.print("Failed to observe game: " + e.getMessage() + "\n");
+        try {
+            char[][] boardState = serverFacade.observeGame(auth.authToken(), gameId);
+            boolean fromWhitePerspective = true;
+            ChessBoardDrawer.drawBoard(boardState, fromWhitePerspective);
+            System.out.print("\nPress ENTER to return to the main menu.\n");
+            input.nextLine();
+        } catch (Exception e) {
+            System.out.print("Failed to observe game: " + e.getMessage() + "\n");
         }
-
     }
 
     private void notLoggedInMenu() {
@@ -225,7 +237,7 @@ public class ClientUI {
                     "QUIT - To exit the game. We hope to see you again soon!\n" +
                     "HELP - Display these options, as you've so wonderfully done!\n");
             System.out.print("\nWhen you are ready to return to the main menu, please press ENTER.\n");
-            String done = input.nextLine();
+            input.nextLine();
             System.out.print("\n");
         }
 
@@ -289,61 +301,14 @@ public class ClientUI {
         }
     }
 
-
     private void joinGameFunction(String playerColor, int gameId) {
         try {
             ChessGame game = serverFacade.joinGame(auth.authToken(), playerColor, gameId);
             char[][] boardChars = convertBoardToCharArray(game.getBoard());
             boolean fromWhitePerspective = playerColor.equalsIgnoreCase("white");
-            ChessBoardDrawer.drawBoard(boardChars,fromWhitePerspective);
+            ChessBoardDrawer.drawBoard(boardChars, fromWhitePerspective);
         } catch (Exception e) {
             System.out.print("Joining Game Failed " + e.getMessage());
-        }
-    }
-
-    private void drawChessBoard(String playerColor) {
-        char[][] startingBoard = {
-                {'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'},
-                {'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'},
-                {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-                {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-                {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-                {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-                {'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'},
-                {'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'}
-        };
-        boolean fromWhitePerspective = playerColor.equalsIgnoreCase(ChessGame.TeamColor.WHITE.toString());
-        ChessBoardDrawer.drawBoard(startingBoard, fromWhitePerspective);
-    }
-
-
-    private void listChessGames() {
-        try {
-            ListGamesResponse gamesResponse = serverFacade.listGames(auth.authToken());
-            List<GameData> games = gamesResponse.getGames();
-            if (games.isEmpty()) {
-                System.out.print("No games found.");
-            } else {
-                int numberedList = 1;
-                for (GameData game: games) {
-                    System.out.printf("%d. Game Name: %s, White: %s, Black: %s%n",
-                            numberedList,
-                            game.gameName(),
-                            game.whiteUsername() != null ? game.whiteUsername() : "No player",
-                            game.blackUsername() != null ? game.blackUsername() : "No player");
-                    numberedList++;
-                }
-
-            }        } catch (Exception e) {
-            System.out.print("Listing Games Failed " + e.getMessage());
-        }
-    }
-
-    private void loggedOutFunction() {
-        try {
-            serverFacade.logout(auth.authToken());
-        } catch (Exception e) {
-            System.out.print("Logout failed " + e.getMessage());
         }
     }
 
@@ -352,6 +317,28 @@ public class ClientUI {
             serverFacade.createGame(gameName, auth.authToken());
         } catch (Exception e) {
             System.out.print("Game Creation Failed " + e.getMessage());
+        }
+    }
+
+    private void listChessGames() {
+        try {
+            ListGamesResponse gamesResponse = serverFacade.listGames(auth.authToken());
+            currentGamesList = gamesResponse.getGames(); // Save list here for number -> id mapping
+            if (currentGamesList.isEmpty()) {
+                System.out.print("No games found.");
+            } else {
+                int numberedList = 1;
+                for (GameData game : currentGamesList) {
+                    System.out.printf("%d. Game Name: %s, White: %s, Black: %s%n",
+                            numberedList,
+                            game.gameName(),
+                            game.whiteUsername() != null ? game.whiteUsername() : "No player",
+                            game.blackUsername() != null ? game.blackUsername() : "No player");
+                    numberedList++;
+                }
+            }
+        } catch (Exception e) {
+            System.out.print("Listing Games Failed " + e.getMessage());
         }
     }
 
@@ -374,13 +361,27 @@ public class ClientUI {
     private static char pieceToChar(ChessPiece piece) {
         char c;
         switch (piece.getPieceType()) {
-            case PAWN: c = 'p'; break;
-            case ROOK: c = 'r'; break;
-            case KNIGHT: c = 'n'; break;
-            case BISHOP: c = 'b'; break;
-            case QUEEN: c = 'q'; break;
-            case KING: c = 'k'; break;
-            default: c = ' '; break;
+            case PAWN:
+                c = 'p';
+                break;
+            case ROOK:
+                c = 'r';
+                break;
+            case KNIGHT:
+                c = 'n';
+                break;
+            case BISHOP:
+                c = 'b';
+                break;
+            case QUEEN:
+                c = 'q';
+                break;
+            case KING:
+                c = 'k';
+                break;
+            default:
+                c = ' ';
+                break;
         }
         // Uppercase for White, lowercase for Black
         if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
@@ -388,6 +389,5 @@ public class ClientUI {
         }
         return c;
     }
-
-
 }
+
