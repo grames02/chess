@@ -149,8 +149,56 @@ public class ChessWebSocket {
 
 
             else if (gameCommand.getCommandType().equals(UserGameCommand.CommandType.RESIGN)) {
+                int gameId = gameCommand.getGameID();
+                String authToken = gameCommand.getAuthToken();
+                AuthData auth = dataAccess.getAuth(authToken);
 
+                if (auth == null) {
+                    ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "ERROR. Invalid authToken.");
+                    session.getRemote().sendString(gson.toJson(error));
+                    return;
+                }
+
+                GameData fullGame = dataAccess.getGame(gameId);
+                if (fullGame == null) {
+                    ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "ERROR. Invalid game.");
+                    session.getRemote().sendString(gson.toJson(error));
+                    return;
+                }
+
+                ChessGame game = fullGame.game();
+
+                // Determine the player's team color by username
+                String playerTeam;
+                if (auth.username().equals(fullGame.whiteUsername())) {
+                    playerTeam = "WHITE";
+                } else if (auth.username().equals(fullGame.blackUsername())) {
+                    playerTeam = "BLACK";
+                } else {
+                    ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "ERROR. Player not in game.");
+                    session.getRemote().sendString(gson.toJson(error));
+                    return;
+                }
+
+                // Mark the game as resigned and over (you'll need to add methods or flags for this in your ChessGame/GameData classes)
+                game.resign(ChessGame.TeamColor.valueOf(playerTeam)); // example method — implement in your ChessGame model
+                game.getResignedPlayer(true);              // example method — implement in your ChessGame model
+
+                // Update the data in your database
+                dataAccess.updateGame(fullGame);
+
+                // Notify all sessions connected to this game about the resignation
+                String notificationText = auth.username() + " (" + playerTeam + ") has resigned. Game over.";
+
+                ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, notificationText);
+
+                for (Session s : gameSessions.get(gameId)) {
+                    if (s.isOpen()) {
+                        s.getRemote().sendString(gson.toJson(notification));
+                    }
+                }
             }
+
             else {
                 // That's no good.
 

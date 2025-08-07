@@ -77,6 +77,16 @@ public class ChessWebSocketCLIENT {
         }
     }
 
+    public void makeResign(String authToken, int gameId) throws Exception {
+        Gson gson = new Gson();
+        JsonObject message = new JsonObject();
+        message.addProperty("commandType", "RESIGN");
+        message.addProperty("authToken", authToken);
+        message.addProperty("gameID", gameId);
+
+        send(gson.toJson(message));
+    }
+
     public void makeMove(String authToken, int gameId, ChessMove move) throws Exception {
         Gson gson = new Gson();
 

@@ -74,6 +74,12 @@ public class ClientUI {
 
             else if (selection.toLowerCase(Locale.ROOT).equals("resign")) {
                 // Implement resign logic here
+                try {
+                    webSocketCLIENT.makeResign(auth.authToken(), currentGameId);
+
+                } catch (Exception e) {
+                    System.err.println("Failed to send resign " + e.getMessage());
+                }
             }
 
             else if (selection.toLowerCase(Locale.ROOT).equals("leave")) {

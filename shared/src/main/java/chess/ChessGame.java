@@ -14,6 +14,10 @@ public class ChessGame {
     private ChessBoard board;
     private TeamColor currentTurn;
 
+    // Added fields for resignation and game over state
+    private TeamColor resignedPlayer; // null if no resignation yet
+    private boolean gameOver = false;
+
     public ChessGame() {
         currentTurn = TeamColor.WHITE;
         ChessBoard newBoard = new ChessBoard();
@@ -71,9 +75,9 @@ public class ChessGame {
             }
             ChessGame testGame = new ChessGame();
             testGame.setBoard(board2);
-                if (!testGame.isInCheck(movingPiece.getTeamColor())) {
-                    approvedMoves.add(move);
-                }
+            if (!testGame.isInCheck(movingPiece.getTeamColor())) {
+                approvedMoves.add(move);
+            }
         }
         return approvedMoves;
     }
@@ -85,6 +89,11 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        // Prevent moves if game is over (e.g. resigned)
+        if (gameOver) {
+            throw new InvalidMoveException("Game is over. No moves allowed.");
+        }
+
         ChessPosition start = move.getStartPosition();
         ChessPosition end = move.getEndPosition();
         ChessPiece piece = board.getPiece(start);
@@ -177,6 +186,14 @@ public class ChessGame {
         currentTurn = (currentTurn == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
     }
 
+    /**
+     * Player resigns the game.
+     * @param playerTeam the team resigning
+     */
+    public void resign(TeamColor playerTeam) {
+        this.resignedPlayer = playerTeam;
+        this.gameOver = true;
+    }
 
     /**
      * Determines if the given team is in check
@@ -281,6 +298,20 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return board;
+    }
+
+    /**
+     * @return the team that resigned or null if none
+     */
+    public TeamColor getResignedPlayer(boolean b) {
+        return resignedPlayer;
+    }
+
+    /**
+     * @return true if the game is over due to resignation or other reasons
+     */
+    public boolean isGameOver() {
+        return gameOver;
     }
 
     private ChessPosition findKingPosition(TeamColor teamColor) {
