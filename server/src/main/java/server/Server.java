@@ -4,12 +4,15 @@ import dataaccess.*;
 import handlers.*;
 import service.*;
 import spark.*;
+import websocket.ChessWebSocket;
 
 public class Server {
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
         Spark.staticFiles.location("web");
+
+        Spark.webSocket("/ws", ChessWebSocket.class);
 
         // Variables to bring in.
         try {
