@@ -1,5 +1,8 @@
 package websocket;
 
+import chess.ChessBoard;
+import chess.ChessMove;
+import chess.ChessPiece;
 import org.eclipse.jetty.websocket.api.annotations.*;
 import org.eclipse.jetty.websocket.api.*;
 import websocket.commands.UserGameCommand;
@@ -22,6 +25,8 @@ public class ChessWebSocket {
 
             }
             else if (gameCommand.getCommandType().equals(UserGameCommand.CommandType.MAKE_MOVE)) {
+                // I could implement the request that the user made in the UI. Passing that variable into here.
+                // That variable will be requestedMove.
 
             }
             else if (gameCommand.getCommandType().equals(UserGameCommand.CommandType.RESIGN)) {
@@ -36,5 +41,9 @@ public class ChessWebSocket {
 
         }
 
+    }
+
+    public boolean makeMove(ChessMove requestedMove) {
+        return true;
     }
 }

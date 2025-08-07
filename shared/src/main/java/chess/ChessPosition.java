@@ -18,6 +18,17 @@ public class ChessPosition {
         this.col = col;
     }
 
+    public static ChessPosition positionInterpreter(String position) {
+        if (position == null || position.length() != 2) {
+            throw new IllegalArgumentException("Invalid position");
+        }
+        char userCol = position.charAt(0);
+        char userRow = position.charAt(1);
+        int col = userCol - 'a' + 1;
+        int row = Character.getNumericValue(userRow);
+        return new ChessPosition(row, col);
+    }
+
     /**
      * @return which row this position is in
      * 1 codes for the bottom row

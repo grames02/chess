@@ -17,6 +17,7 @@ public class ClientUI {
     private Scanner input;
     private boolean loggedIn = false;
     private boolean quitProgram = false;
+    private boolean gameplayMode = false;
     private AuthData auth;
 
     public ClientUI(ServerFacade serverFacade) {
@@ -34,6 +35,74 @@ public class ClientUI {
         }
     }
 
+    private void gameplayMenu() {
+       while (gameplayMode) {
+           System.out.print("\nTime to play Chess! Please enter one of the options below:\n" +
+                   "\nMAKE MOVE" + "\nREDRAW CHESS BOARD" + "\nHIGHLIGHT LEGAL MOVES" +
+                   "\nRESIGN" + "\nLEAVE" + "\nHELP\n");
+           System.out.print("\nEnter your selection here: ");
+           String selection = input.nextLine();
+
+           if (selection.toLowerCase(Locale.ROOT).equals("make move")) {
+               System.out.print("\nMake your move with the following format\n<Start Position> <End Position>\n");
+               System.out.print("\nEnter your selection here: ");
+               String move = input.nextLine();
+               String[] parts = move.trim().split(" ");
+               if (parts.length != 2) {
+                   System.out.print("\nInvalid Move. Please try again.");
+                   continue;
+               }
+               ChessPosition start = ChessPosition.positionInterpreter(parts[0]);
+               ChessPosition end = ChessPosition.positionInterpreter(parts[1]);
+
+               try {
+                   char[][] updatedBoard = serverFacade.makeMove(auth.authToken(), start, end);
+               } catch (Exception e) {
+                   System.out.print("Move failed.");
+               }
+           }
+
+           else if (selection.toLowerCase(Locale.ROOT).equals("redraw chess board")) {
+
+           }
+
+           else if (selection.toLowerCase(Locale.ROOT).equals("highlight legal moves")) {
+
+           }
+
+           else if (selection.toLowerCase(Locale.ROOT).equals("resign")) {
+               // Declare one of the players the winner. Does NOT kick players out of the game.
+
+           }
+
+           else if (selection.toLowerCase(Locale.ROOT).equals("leave")) {
+               System.out.print("\nYou have left the game.");
+               // Implement something here where their player ID is removed from this current game.
+               // The game should also end at this point.
+
+               gameplayMode = false;
+           }
+
+           else if (selection.toLowerCase(Locale.ROOT).equals("help")) {
+               System.out.print("\nYou have selected: HELP.\nHere are further details regarding what each command does:\n");
+               System.out.print("\nMAKE MOVE - Select to move one of your chess pieces.\n" +
+                       "REDRAW CHESS BOARD - Select to have the current chess board drawn again.\n" +
+                       "HIGHLIGHT LEGAL MOVES - Select to see all potential moves a certain piece can make.\n" +
+                       "RESIGN - Select to surrender in the current game of chess.\n" +
+                       "LEAVE - Select to leave the current game of chess.\n" +
+                       "HELP - Select to display these options, as you've so wonderfully done!\n");
+               System.out.print("\nWhen you are ready to return to the selection screen, please press ENTER.\n");
+               String done = input.nextLine();
+               System.out.print("\n");
+           }
+
+           else {
+               System.out.print("\nInvalid Response. Please Try Again.\n");
+               System.out.print("\n");
+           }
+       }
+    }
+
     private void loggedInMenu() {
         while (loggedIn) {
             System.out.print("\nWelcome to Chess! Please enter one of the options listed below!\n" +
@@ -41,6 +110,7 @@ public class ClientUI {
                     "\nOBSERVE GAME" + "\nLOGOUT" + "\nHELP\n");
             System.out.print("\nEnter your selection here: ");
             String selection = input.nextLine();
+
             if (selection.toLowerCase(Locale.ROOT).equals("play game")) {
                 System.out.print("\nPlease enter the game information with the following format:\n" +
                         "\n<Team Color: White/Black> <Game Number>\n");
@@ -58,8 +128,10 @@ public class ClientUI {
                 String playerColor = gameJoinParts[0];
                 int gameId = Integer.parseInt(gameJoinParts[1]);
                 joinGameFunction(playerColor, gameId);
-                System.out.print("\nPress ENTER to return to the main menu.\n");
-                input.nextLine();
+
+                // Insert in code to connect to the Websocket somewhere around here.
+                gameplayMode = true;
+                gameplayMenu();
 
             } else if (selection.toLowerCase(Locale.ROOT).equals("create game")) {
                 System.out.print("\nPlease enter a name for the game:" +

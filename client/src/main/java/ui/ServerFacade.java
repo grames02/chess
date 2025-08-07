@@ -1,6 +1,7 @@
 package ui;
 
 import chess.ChessGame;
+import chess.ChessPosition;
 import model.*;
 import com.google.gson.Gson;
 
@@ -190,4 +191,7 @@ public class ServerFacade {
         }
     }
 
+    public char[][] makeMove(String s, ChessPosition start, ChessPosition end) {
+        return null;
+    }
 }
