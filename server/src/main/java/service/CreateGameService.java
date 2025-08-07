@@ -1,5 +1,6 @@
 package service;
 
+import chess.ChessGame;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import model.*;
@@ -21,7 +22,7 @@ public class CreateGameService {
         if (auth == null) {
             throw new DataAccessException("Error: unauthorized");
         }
-        GameData game = new GameData(0, null, null, request.gameName(), null);
+        GameData game = new GameData(0, null, null, request.gameName(), new ChessGame());
         return dataAccess.createGame(game);
     }
 }

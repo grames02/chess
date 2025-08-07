@@ -1,11 +1,11 @@
 package ui;
 
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 import model.AuthData;
 import model.GameData;
 import model.ListGamesResponse;
+import model.MakeMoveRequest;
+import websocket.commands.UserGameCommand;
 
 import java.util.List;
 import java.util.Locale;
@@ -56,7 +56,10 @@ public class ClientUI {
                ChessPosition end = ChessPosition.positionInterpreter(parts[1]);
 
                try {
-                   char[][] updatedBoard = serverFacade.makeMove(auth.authToken(), start, end);
+//                   MakeMoveRequest moveRequest = new MakeMoveRequest(auth.authToken(), gameId, new ChessMove(start, end, null));
+//                   String json = gson.toJson(moveRequest);
+//                   serverFacade.getWebSocket().send(json);
+//                   char[][] updatedBoard = serverFacade.makeMove(auth.authToken(), int gameId, start, end);
                } catch (Exception e) {
                    System.out.print("Move failed.");
                }
@@ -129,9 +132,18 @@ public class ClientUI {
                 int gameId = Integer.parseInt(gameJoinParts[1]);
                 joinGameFunction(playerColor, gameId);
 
-                // Insert in code to connect to the Websocket somewhere around here.
-                gameplayMode = true;
-                gameplayMenu();
+                // Insert in code to connect to the Websocket here.
+                try {
+                    String serverUrl = "ws://localhost:8080/ws";
+                    ChessWebSocketCLIENT webSocketCLIENT = new ChessWebSocketCLIENT(serverUrl);
+                    System.out.print("Successfully connected to web socket.");
+                    gameplayMode = true;
+                    gameplayMenu();
+                    UserGameCommand connectCommand = new UserGameCommand(UserGameCommand.CommandType.CONNECT, auth.authToken(), gameId);
+
+                } catch (Exception e) {
+                    System.err.print("Failed to connect to WebSocket" + e.getMessage());
+                }
 
             } else if (selection.toLowerCase(Locale.ROOT).equals("create game")) {
                 System.out.print("\nPlease enter a name for the game:" +
@@ -162,7 +174,7 @@ public class ClientUI {
                 }
                 observeGameFunction(gameId);
 
-                
+
 
             } else if (selection.toLowerCase(Locale.ROOT).equals("logout")) {
                 System.out.print("\nYou are now logged out. Sending you back to the home menu.\n");
@@ -280,8 +292,10 @@ public class ClientUI {
 
     private void joinGameFunction(String playerColor, int gameId) {
         try {
-            serverFacade.joinGame(auth.authToken(), playerColor, gameId);
-            drawChessBoard(playerColor);
+            ChessGame game = serverFacade.joinGame(auth.authToken(), playerColor, gameId);
+            char[][] boardChars = convertBoardToCharArray(game.getBoard());
+            boolean fromWhitePerspective = playerColor.equalsIgnoreCase("white");
+            ChessBoardDrawer.drawBoard(boardChars,fromWhitePerspective);
         } catch (Exception e) {
             System.out.print("Joining Game Failed " + e.getMessage());
         }
@@ -340,5 +354,40 @@ public class ClientUI {
             System.out.print("Game Creation Failed " + e.getMessage());
         }
     }
+
+    public static char[][] convertBoardToCharArray(ChessBoard board) {
+        char[][] boardChars = new char[8][8];
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPosition pos = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(pos);
+                if (piece == null) {
+                    boardChars[row - 1][col - 1] = ' ';  // empty square
+                } else {
+                    boardChars[row - 1][col - 1] = pieceToChar(piece);
+                }
+            }
+        }
+        return boardChars;
+    }
+
+    private static char pieceToChar(ChessPiece piece) {
+        char c;
+        switch (piece.getPieceType()) {
+            case PAWN: c = 'p'; break;
+            case ROOK: c = 'r'; break;
+            case KNIGHT: c = 'n'; break;
+            case BISHOP: c = 'b'; break;
+            case QUEEN: c = 'q'; break;
+            case KING: c = 'k'; break;
+            default: c = ' '; break;
+        }
+        // Uppercase for White, lowercase for Black
+        if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+            c = Character.toUpperCase(c);
+        }
+        return c;
+    }
+
 
 }

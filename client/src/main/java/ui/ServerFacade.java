@@ -1,6 +1,7 @@
 package ui;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import chess.ChessPosition;
 import model.*;
 import com.google.gson.Gson;
@@ -15,6 +16,7 @@ import java.net.http.HttpClient;
 import java.util.List;
 
 public class ServerFacade {
+    private ChessWebSocketCLIENT webSocket;
     private final String baseUrl;
     private final Gson gson = new Gson();
     private final HttpClient httpClient = HttpClient.newHttpClient();
@@ -128,6 +130,7 @@ public class ServerFacade {
         connection.setRequestProperty("Content-type", "application/json");
         connection.setDoOutput(true);
 
+        ChessGame game;
         try (OutputStream os = connection.getOutputStream()) {
             os.write(gson.toJson(joinGameReq).getBytes());
         }
@@ -136,11 +139,24 @@ public class ServerFacade {
         InputStream responseStream = (respCode == 200) ? connection.getInputStream() : connection.getErrorStream();
         try (InputStreamReader reader = new InputStreamReader(responseStream)) {
             if (respCode == 200) {
-                return gson.fromJson(reader, ChessGame.class);
+                game = gson.fromJson(reader, ChessGame.class);
             } else {
                 throw new IOException("Join Game Failed");
             }
         }
+
+        try {
+            if (webSocket == null || !webSocket.isOpen()) {
+                webSocket = new ChessWebSocketCLIENT("ws://localhost:8080/ws");
+            }
+            ConnectRequest connectRequest = new ConnectRequest(authToken, gameID);
+            String msg = gson.toJson(connectRequest);
+            webSocket.send(msg);
+
+        } catch (Exception e) {
+            System.out.print("Invalid Connect request. ERROR.");
+        }
+        return game;
     }
 
     public void logout(String authToken) throws IOException {
@@ -191,7 +207,7 @@ public class ServerFacade {
         }
     }
 
-    public char[][] makeMove(String s, ChessPosition start, ChessPosition end) {
-        return null;
+    public void makeMove(String authToken, int gameId, ChessPosition start, ChessPosition end) throws Exception {
+
     }
 }

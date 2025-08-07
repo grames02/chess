@@ -14,10 +14,6 @@ import java.util.Collection;
 import java.util.List;
 
 public class MySqlDataAccess implements DataAccess {
-
-
-
-
     @Override
     public void clearAll() throws DataAccessException {
         String[] tables = {"authdata", "userdata", "gamedata"};
