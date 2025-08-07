@@ -11,12 +11,11 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessGame {
+    private TeamColor resignedPlayer = null;
+    private boolean gameOver = false;
     private ChessBoard board;
     private TeamColor currentTurn;
 
-    // Added fields for resignation and game over state
-    private TeamColor resignedPlayer; // null if no resignation yet
-    private boolean gameOver = false;
 
     public ChessGame() {
         currentTurn = TeamColor.WHITE;
@@ -39,6 +38,14 @@ public class ChessGame {
      */
     public void setTeamTurn(TeamColor team) {
         this.currentTurn = team;
+    }
+
+    public void setGameOver() {
+        this.gameOver = true;
+    }
+
+    public boolean isOver() {
+        return gameOver;
     }
 
     /**

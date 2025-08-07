@@ -2,6 +2,7 @@ package websocket;
 
 import chess.ChessGame;
 import chess.ChessMove;
+import chess.InvalidMoveException;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import dataaccess.MySqlDataAccess;
@@ -97,17 +98,14 @@ public class ChessWebSocket {
 
                 ChessGame game = fullGame.game();
 
-                // Check if it is the player's turn
-                String currentTurn = game.getTeamTurn().name(); // Assuming currentTurn() returns TeamColor enum (WHITE or BLACK)
+                String currentTurn = game.getTeamTurn().name();
 
-                // Determine player's team color by username
                 String playerTeam;
                 if (auth.username().equals(fullGame.whiteUsername())) {
                     playerTeam = "WHITE";
                 } else if (auth.username().equals(fullGame.blackUsername())) {
                     playerTeam = "BLACK";
                 } else {
-                    // Player not part of this game
                     ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "ERROR. Player not in game.");
                     session.getRemote().sendString(gson.toJson(error));
                     return;
@@ -128,7 +126,15 @@ public class ChessWebSocket {
                     return;
                 }
 
-                game.makeMove(move);
+                try {
+                    game.makeMove(move);
+                } catch (InvalidMoveException e) {
+                    // *** Send an ERROR message back here ***
+                    ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "ERROR. " + e.getMessage());
+                    session.getRemote().sendString(gson.toJson(error));
+                    return;
+                }
+
                 dataAccess.updateGame(fullGame);
 
                 ServerMessage loadGame = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, fullGame);
@@ -179,6 +185,12 @@ public class ChessWebSocket {
                     session.getRemote().sendString(gson.toJson(error));
                     return;
                 }
+                if (game.isOver()) {
+                    ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR,
+                            "ERROR. Game is already over; cannot resign again.");
+                    session.getRemote().sendString(gson.toJson(error));
+                    return;
+                }
 
                 // Mark the game as resigned and over (you'll need to add methods or flags for this in your ChessGame/GameData classes)
                 game.resign(ChessGame.TeamColor.valueOf(playerTeam)); // example method — implement in your ChessGame model
@@ -216,7 +228,4 @@ public class ChessWebSocket {
         gameSessions.values().forEach(sessions -> sessions.remove(session));
     }
 
-    public boolean makeMove(ChessMove requestedMove) {
-        return true;
-    }
 }
