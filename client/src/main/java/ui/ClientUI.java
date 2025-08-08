@@ -58,9 +58,12 @@ public class ClientUI {
                 ChessPosition end = ChessPosition.positionInterpreter(parts[1]);
 
                 try {
-                    // Implement making a move using WebSocket or serverFacade here
+                    ChessMove chessMove = new ChessMove(start, end, null);
+                    webSocketCLIENT.makeMove(auth.authToken(), currentGameId, chessMove);
+                    // Now wait for server response to redraw board in onMessage handler
+
                 } catch (Exception e) {
-                    System.out.print("Move failed.");
+                    System.out.print("Move failed: " + e.getMessage());
                 }
             }
 
@@ -114,6 +117,7 @@ public class ClientUI {
             String selection = input.nextLine();
 
             if (selection.toLowerCase(Locale.ROOT).equals("play game")) {
+                assignChessList();
                 System.out.print("\nPlease enter the game information with the following format:\n" +
                         "\n<Team Color: White/Black> <Game Number>\n");
                 System.out.print("\nEnter Game Information HERE: ");
@@ -129,35 +133,17 @@ public class ClientUI {
                     return;
                 }
 
-                int gameNumber;
-                try {
-                    gameNumber = Integer.parseInt(gameJoinParts[1]);
-                } catch (NumberFormatException e) {
-                    System.out.print("Invalid game number, please try again.");
-                    return;
-                }
+                int gameNumber = Integer.parseInt(gameJoinParts[1]);
+                currentGameId = currentGamesList.get(gameNumber - 1).gameID();
 
-                // Auto-fetch games if not loaded yet
-                if (currentGamesList == null) {
-                    listChessGames();
-                }
-
-                if (currentGamesList == null || gameNumber < 1 || gameNumber > currentGamesList.size()) {
-                    System.out.print("Invalid game number, please try again.");
-                    return;
-                }
-
-                int gameId = currentGamesList.get(gameNumber - 1).gameID();
-
-                joinGameFunction(playerColor, gameId);
+                joinGameFunction(playerColor, currentGameId);
 
                 try {
                     String serverUrl = "ws://localhost:8080/ws";
-                    webSocketCLIENT = new ChessWebSocketCLIENT(serverUrl);
+                    webSocketCLIENT = new ChessWebSocketCLIENT(serverUrl, this);
                     System.out.print("Successfully connected to web socket.");
                     gameplayMode = true;
                     this.fromWhitePerspective = playerColor.equalsIgnoreCase("white");
-                    this.currentGameId = gameId;
                     gameplayMenu();
                 } catch (Exception e) {
                     System.err.print("Failed to connect to WebSocket " + e.getMessage());
@@ -325,6 +311,13 @@ public class ClientUI {
         }
     }
 
+    public void updateBoardDisplay(GameData gameData) {
+        ChessBoard board = gameData.game().getBoard();
+        char[][] boardChars = convertBoardToCharArray(board);
+        ChessBoardDrawer.drawBoard(boardChars, fromWhitePerspective);
+    }
+
+
     private void createGameFunction(String gameName) {
         try {
             serverFacade.createGame(gameName, auth.authToken());
@@ -333,10 +326,18 @@ public class ClientUI {
         }
     }
 
-    private void listChessGames() {
+    private void assignChessList() {
         try {
             ListGamesResponse gamesResponse = serverFacade.listGames(auth.authToken());
             currentGamesList = gamesResponse.getGames(); // Save list here for number -> id mapping
+        } catch (Exception e) {
+
+        }
+    }
+
+    private void listChessGames() {
+        try {
+            assignChessList();
             if (currentGamesList.isEmpty()) {
                 System.out.print("No games found.");
             } else {

@@ -22,7 +22,7 @@ public class ServerFacadeTests {
         int port = server.run(0);
         String baseUrl = "http://localhost:" + port;
         System.out.println(baseUrl);
-        facade = new ServerFacade(baseUrl);
+        facade = new ServerFacade(baseUrl, null);
     }
 
     @AfterAll

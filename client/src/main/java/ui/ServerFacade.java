@@ -21,9 +21,11 @@ public class ServerFacade {
     private final String baseUrl;
     private final Gson gson = new Gson();
     private final HttpClient httpClient = HttpClient.newHttpClient();
+    private final ClientUI ui;
 
-    public ServerFacade(String baseUrl) {
+    public ServerFacade(String baseUrl, ClientUI ui) {
         this.baseUrl = baseUrl;
+        this.ui = ui;
     }
 
     public AuthData login(String username, String password) throws IOException {
@@ -118,7 +120,7 @@ public class ServerFacade {
 
     public ChessGame joinGame(String authToken, String playerColor, int gameNumber) throws IOException {
         ListGamesResponse listResponse = listGames(authToken);
-        if (gameNumber <= 0 || gameNumber > listResponse.getGames().size()) {
+        if (gameNumber <= 0) {
             throw new IOException("Invalid game number");
         }
         int gameID = listResponse.getGames().get(gameNumber - 1).gameID();
@@ -148,7 +150,7 @@ public class ServerFacade {
 
         try {
             if (webSocket == null || !webSocket.isOpen()) {
-                webSocket = new ChessWebSocketCLIENT("ws://localhost:8080/ws");
+                webSocket = new ChessWebSocketCLIENT("ws://localhost:8080/ws", ui);
             }
             ConnectRequest connectRequest = new ConnectRequest(authToken, gameID);
             String msg = gson.toJson(connectRequest);

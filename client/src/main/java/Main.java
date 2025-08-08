@@ -10,7 +10,7 @@ public class Main {
 
         // My code below. Above is stuff provided at the beginning.
         String baseUrl = "http://localhost:8080";
-        ServerFacade serverFacade = new ServerFacade(baseUrl);
+        ServerFacade serverFacade = new ServerFacade(baseUrl, null);
         ClientUI clientUI = new ClientUI(serverFacade);
         clientUI.run();
     }

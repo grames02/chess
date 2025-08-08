@@ -1,10 +1,12 @@
 package ui;
 
+import chess.ChessGame;
 import chess.ChessMove;
 import com.google.gson.Gson;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import model.GameData;
 import websocket.messages.ServerMessage;
 
 import javax.websocket.*;
@@ -15,9 +17,11 @@ public class ChessWebSocketCLIENT {
 
     private Session session;
     private final URI serverUri;
+    private final ClientUI ui;
 
-    public ChessWebSocketCLIENT(String serverUrl) throws Exception {
+    public ChessWebSocketCLIENT(String serverUrl, ClientUI ui) throws Exception {
         this.serverUri = new URI(serverUrl);
+        this.ui = ui;
         connect();
     }
 
@@ -38,9 +42,9 @@ public class ChessWebSocketCLIENT {
         Gson gson = new Gson();
         ServerMessage baseMessage = gson.fromJson(message, ServerMessage.class);
         if (baseMessage.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
-
+            GameData gameData = gson.fromJson(message, GameData.class);
+            ui.updateBoardDisplay(gameData);
         }
-
     }
 
     @OnClose
@@ -71,7 +75,9 @@ public class ChessWebSocketCLIENT {
 
     public void close() {
         try {
-            if (session != null) session.close();
+            if (session != null) {
+                session.close();
+            }
         } catch (Exception e) {
             System.err.println("Error closing WebSocket: " + e.getMessage());
         }
