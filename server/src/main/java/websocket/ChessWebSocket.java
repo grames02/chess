@@ -4,7 +4,6 @@ import chess.ChessGame;
 import chess.ChessMove;
 import chess.InvalidMoveException;
 import dataaccess.DataAccess;
-import dataaccess.DataAccessException;
 import dataaccess.MySqlDataAccess;
 import model.AuthData;
 import model.GameData;
@@ -25,10 +24,10 @@ public class ChessWebSocket {
     private final DataAccess dataAccess = new MySqlDataAccess();
 
     // Map of gameID to sessions connected to that game
-    private static final Map<Integer, Set<Session>> gameSessions = new ConcurrentHashMap<>();
+    private static final Map<Integer, Set<Session>> GAME_SESSIONS = new ConcurrentHashMap<>();
 
     // Map session to username (to identify who is who)
-    private static final Map<Session, String> sessionUsernames = new ConcurrentHashMap<>();
+    private static final Map<Session, String> SESSION_USERNAMES = new ConcurrentHashMap<>();
 
     @OnWebSocketMessage
     public void onMessage(Session session, String message) throws Exception {
@@ -54,11 +53,11 @@ public class ChessWebSocket {
                     return;
                 }
 
-                // Add session to the gameSessions map
-                gameSessions.computeIfAbsent(gameId, k -> new CopyOnWriteArraySet<>()).add(session);
+                // Add session to the GAME_SESSIONS map
+                GAME_SESSIONS.computeIfAbsent(gameId, k -> new CopyOnWriteArraySet<>()).add(session);
 
                 // Save username associated with session for notifications
-                sessionUsernames.put(session, auth.username());
+                SESSION_USERNAMES.put(session, auth.username());
 
                 ServerMessage loadGame = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, fullGame);
 
@@ -68,7 +67,7 @@ public class ChessWebSocket {
                 ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
                         auth.username() + " has joined the game.");
 
-                for (Session s : gameSessions.get(gameId)) {
+                for (Session s : GAME_SESSIONS.get(gameId)) {
                     if (!s.equals(session) && s.isOpen()) {
                         s.getRemote().sendString(gson.toJson(notification));
                     }
@@ -109,15 +108,15 @@ public class ChessWebSocket {
                 // Update in-memory map if you keep a cache (optional)
                 // For example, replace fullGame with updatedGame in your in-memory structure
 
-                // Remove session from gameSessions and sessionUsernames maps
-                Set<Session> sessions = gameSessions.get(gameId);
+                // Remove session from GAME_SESSIONS and sessionUsernames maps
+                Set<Session> sessions = GAME_SESSIONS.get(gameId);
                 if (sessions != null) {
                     sessions.remove(session);
                     if (sessions.isEmpty()) {
-                        gameSessions.remove(gameId);
+                        GAME_SESSIONS.remove(gameId);
                     }
                 }
-                sessionUsernames.remove(session);
+                SESSION_USERNAMES.remove(session);
 
                 // Notify remaining sessions except leaving one
                 if (sessions != null) {
@@ -193,14 +192,14 @@ public class ChessWebSocket {
 
                 ServerMessage loadGame = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, fullGame);
 
-                for (Session s : gameSessions.get(gameId)) {
+                for (Session s : GAME_SESSIONS.get(gameId)) {
                     if (s.isOpen()) {
                         s.getRemote().sendString(gson.toJson(loadGame));
                     }
                 }
                 ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
                         auth.username() + " made a move.");
-                for (Session s : gameSessions.get(gameId)) {
+                for (Session s : GAME_SESSIONS.get(gameId)) {
                     if (!s.equals(session) && s.isOpen()) {
                         s.getRemote().sendString(gson.toJson(notification));
                     }
@@ -258,7 +257,7 @@ public class ChessWebSocket {
 
                 ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, notificationText);
 
-                for (Session s : gameSessions.get(gameId)) {
+                for (Session s : GAME_SESSIONS.get(gameId)) {
                     if (s.isOpen()) {
                         s.getRemote().sendString(gson.toJson(notification));
                     }
@@ -278,8 +277,8 @@ public class ChessWebSocket {
 
     @OnWebSocketClose
     public void onClose(Session session, int statusCode, String reason) {
-        sessionUsernames.remove(session);
-        gameSessions.values().forEach(sessions -> sessions.remove(session));
+        SESSION_USERNAMES.remove(session);
+        GAME_SESSIONS.values().forEach(sessions -> sessions.remove(session));
     }
 
 }
