@@ -75,9 +75,63 @@ public class ChessWebSocket {
                 }
 
             }
-            else if (gameCommand.getCommandType().equals(UserGameCommand.CommandType.LEAVE)) {
 
+            else if (gameCommand.getCommandType().equals(UserGameCommand.CommandType.LEAVE)) {
+                int gameId = gameCommand.getGameID();
+                String authToken = gameCommand.getAuthToken();
+                AuthData auth = dataAccess.getAuth(authToken);
+
+                if (auth == null) {
+                    ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "ERROR. Invalid authToken.");
+                    session.getRemote().sendString(gson.toJson(error));
+                    return;
+                }
+
+                GameData fullGame = dataAccess.getGame(gameId);
+                if (fullGame == null) {
+                    ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "ERROR. Invalid game.");
+                    session.getRemote().sendString(gson.toJson(error));
+                    return;
+                }
+
+                String username = auth.username();
+                GameData updatedGame = fullGame;
+
+                if (username.equals(fullGame.whiteUsername())) {
+                    updatedGame = fullGame.withWhiteUsername(null);
+                } else if (username.equals(fullGame.blackUsername())) {
+                    updatedGame = fullGame.withBlackUsername(null);
+                }
+
+                // Update game in DB
+                dataAccess.updateGame(updatedGame);
+
+                // Update in-memory map if you keep a cache (optional)
+                // For example, replace fullGame with updatedGame in your in-memory structure
+
+                // Remove session from gameSessions and sessionUsernames maps
+                Set<Session> sessions = gameSessions.get(gameId);
+                if (sessions != null) {
+                    sessions.remove(session);
+                    if (sessions.isEmpty()) {
+                        gameSessions.remove(gameId);
+                    }
+                }
+                sessionUsernames.remove(session);
+
+                // Notify remaining sessions except leaving one
+                if (sessions != null) {
+                    ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+                            username + " has left the game.");
+                    for (Session s : sessions) {
+                        if (s.isOpen()) {
+                            s.getRemote().sendString(gson.toJson(notification));
+                        }
+                    }
+                }
             }
+
+
             else if (gameCommand.getCommandType().equals(UserGameCommand.CommandType.MAKE_MOVE)) {
                 int gameId = gameCommand.getGameID();
                 String authToken = gameCommand.getAuthToken();

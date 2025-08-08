@@ -73,10 +73,8 @@ public class ClientUI {
             }
 
             else if (selection.toLowerCase(Locale.ROOT).equals("resign")) {
-                // Implement resign logic here
                 try {
                     webSocketCLIENT.makeResign(auth.authToken(), currentGameId);
-
                 } catch (Exception e) {
                     System.err.println("Failed to send resign " + e.getMessage());
                 }
@@ -139,6 +137,11 @@ public class ClientUI {
                     return;
                 }
 
+                // Auto-fetch games if not loaded yet
+                if (currentGamesList == null) {
+                    listChessGames();
+                }
+
                 if (currentGamesList == null || gameNumber < 1 || gameNumber > currentGamesList.size()) {
                     System.out.print("Invalid game number, please try again.");
                     return;
@@ -148,16 +151,16 @@ public class ClientUI {
 
                 joinGameFunction(playerColor, gameId);
 
-                // Connect to websocket and start gameplay mode here (not fully shown)
-
                 try {
                     String serverUrl = "ws://localhost:8080/ws";
-                    ChessWebSocketCLIENT webSocketCLIENT = new ChessWebSocketCLIENT(serverUrl);
+                    webSocketCLIENT = new ChessWebSocketCLIENT(serverUrl);
                     System.out.print("Successfully connected to web socket.");
                     gameplayMode = true;
+                    this.fromWhitePerspective = playerColor.equalsIgnoreCase("white");
+                    this.currentGameId = gameId;
                     gameplayMenu();
                 } catch (Exception e) {
-                    System.err.print("Failed to connect to WebSocket" + e.getMessage());
+                    System.err.print("Failed to connect to WebSocket " + e.getMessage());
                 }
 
             } else if (selection.toLowerCase(Locale.ROOT).equals("create game")) {
@@ -185,6 +188,10 @@ public class ClientUI {
                 } catch (NumberFormatException e) {
                     System.out.print("Invalid game number. Please enter a valid number.\n");
                     return;
+                }
+
+                if (currentGamesList == null) {
+                    listChessGames();
                 }
 
                 if (currentGamesList == null || gameNumber < 1 || gameNumber > currentGamesList.size()) {
@@ -311,7 +318,7 @@ public class ClientUI {
         try {
             ChessGame game = serverFacade.joinGame(auth.authToken(), playerColor, gameId);
             char[][] boardChars = convertBoardToCharArray(game.getBoard());
-            boolean fromWhitePerspective = playerColor.equalsIgnoreCase("white");
+            fromWhitePerspective = playerColor.equalsIgnoreCase("white");
             ChessBoardDrawer.drawBoard(boardChars, fromWhitePerspective);
         } catch (Exception e) {
             System.out.print("Joining Game Failed " + e.getMessage());
@@ -396,4 +403,3 @@ public class ClientUI {
         return c;
     }
 }
-
