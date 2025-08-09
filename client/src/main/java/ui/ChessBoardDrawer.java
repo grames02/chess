@@ -1,5 +1,12 @@
 package ui;
 
+import chess.ChessMove;
+import chess.ChessPosition;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 public class ChessBoardDrawer {
     public static void drawBoard(char[][] board, boolean fromWhitePerspective) {
         if (board.length != 8 || board[0].length != 8) {
@@ -59,5 +66,54 @@ public class ChessBoardDrawer {
             case 'r' -> EscapeSequences.BLACK_ROOK;
             default -> EscapeSequences.EMPTY;
         };
+    }
+
+    public static void drawBoardWithH(char[][] boardChars, Collection<ChessMove> moves, boolean fromWhitePerspective) {
+        if (boardChars.length != 8 || boardChars[0].length != 8) {
+            throw new IllegalArgumentException("Board must be 8x8");
+        }
+        String letters = "abcdefgh";
+        String numbers = "12345678";
+        Set<ChessPosition> highlightPositions = new HashSet<>();
+        for (ChessMove move : moves) {
+            highlightPositions.add(move.getEndPosition());
+        }
+        System.out.print(EscapeSequences.ERASE_SCREEN);
+        System.out.print("   ");
+        for (int col = 0; col < 8; col++) {
+            int fileIndex = fromWhitePerspective ? col : 7 - col;
+            System.out.print(" " + letters.charAt(fileIndex) + "  ");
+        }
+        System.out.println();
+        for (int row = 0; row < 8; row++) {
+            int boardRow = fromWhitePerspective ? 7 - row : row;
+
+            System.out.print(" " + numbers.charAt(boardRow) + " ");
+
+            for (int col = 0; col < 8; col++) {
+                int boardCol = fromWhitePerspective ? col : 7 - col;
+
+                ChessPosition pos = new ChessPosition(boardRow + 1, boardCol + 1);
+
+                boolean isHighlight = highlightPositions.contains(pos);
+                String bgColor;
+                if (isHighlight) {
+                    bgColor = EscapeSequences.SET_BG_COLOR_YELLOW;
+                } else {
+                    boolean isLightSquare = (boardRow + boardCol) % 2 == 0;
+                    bgColor = isLightSquare ? EscapeSequences.SET_BG_COLOR_DARK_GREY : EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
+                }
+
+                String pieceSymbol = getPieceSymbol(boardChars[boardRow][boardCol]);
+                System.out.print(bgColor + pieceSymbol + EscapeSequences.RESET_BG_COLOR);
+            }
+            System.out.println(" " + numbers.charAt(boardRow) + " ");
+        }
+        System.out.print("   ");
+        for (int col = 0; col < 8; col++) {
+            int fileIndex = fromWhitePerspective ? col : 7 - col;
+            System.out.print(" " + letters.charAt(fileIndex) + "  ");
+        }
+        System.out.println();
     }
 }

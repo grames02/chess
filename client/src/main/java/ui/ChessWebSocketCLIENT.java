@@ -31,12 +31,10 @@ public class ChessWebSocketCLIENT {
     @OnOpen
     public void onOpen(Session session) {
         this.session = session;
-        System.out.println("WebSocket connection opened.");
     }
 
     @OnMessage
     public void onMessage(String message) {
-        System.out.println("Received from server: " + message);
         Gson gson = new Gson();
 
         try {

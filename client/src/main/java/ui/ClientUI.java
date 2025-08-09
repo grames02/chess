@@ -5,6 +5,7 @@ import model.AuthData;
 import model.GameData;
 import model.ListGamesResponse;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
@@ -78,6 +79,8 @@ public class ClientUI {
 
             else if (selection.toLowerCase(Locale.ROOT).equals("highlight legal moves")) {
                 // Implement highlight legal moves here
+                highlightLegalMoves();
+
             }
 
             else if (selection.toLowerCase(Locale.ROOT).equals("resign")) {
@@ -155,14 +158,12 @@ public class ClientUI {
                         webSocketCLIENT = null;
                     }
                     webSocketCLIENT = new ChessWebSocketCLIENT(serverUrl, this);
-                    System.out.print("Successfully connected to web socket.");
 
                     gameplayMode = true;
                     this.fromWhitePerspective = playerColor.equalsIgnoreCase("white");
 
                     // Send CONNECT command to load full game data from server
                     sendConnectCommand();
-
                     gameplayMenu(gameNumber);
                 } catch (Exception e) {
                     System.err.print("Failed to connect to WebSocket " + e.getMessage());
@@ -374,9 +375,28 @@ public class ClientUI {
             System.out.println("Warning: updateLatestGameData received null gameData!");
             return;
         }
-        System.out.println("Updating latest game data.");
         this.latestGameData = gameData;
     }
+
+    private void highlightLegalMoves() {
+        System.out.print("\nPlease enter the position of the piece you'd like to see move options for.\n");
+        System.out.print("\nInput position here: ");
+        String moveInput = input.nextLine();
+        ChessPosition startPos = ChessPosition.positionInterpreter(moveInput);
+        if (startPos == null) {
+            System.out.print("Invalid position\n");
+            return;
+        }
+        ChessGame game = latestGameData.game();
+        Collection<ChessMove> moves = game.validMoves(startPos);
+        if (moves == null || moves.isEmpty()) {
+            System.out.print("\nNo valid moves for that piece.\n");
+            return;
+        }
+        char[][] boardChars = convertBoardToCharArray(game.getBoard());
+        ChessBoardDrawer.drawBoardWithH(boardChars, moves, fromWhitePerspective);
+    }
+
 
     public void updateBoardDisplay(GameData gameData) {
         ChessBoard board = gameData.game().getBoard();
