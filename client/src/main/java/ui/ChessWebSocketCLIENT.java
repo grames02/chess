@@ -1,13 +1,11 @@
 package ui;
 
-import chess.ChessGame;
 import chess.ChessMove;
 import com.google.gson.Gson;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import model.GameData;
-import websocket.messages.ServerMessage;
 
 import javax.websocket.*;
 import java.net.URI;
@@ -40,13 +38,48 @@ public class ChessWebSocketCLIENT {
     public void onMessage(String message) {
         System.out.println("Received from server: " + message);
         Gson gson = new Gson();
-        ServerMessage baseMessage = gson.fromJson(message, ServerMessage.class);
-        if (baseMessage.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
-            GameData gameData = gson.fromJson(message, GameData.class);
-            ui.updateLatestGameData(gameData);
+
+        try {
+            // First, just get the type
+            JsonObject json = gson.fromJson(message, JsonObject.class);
+            String type = json.get("serverMessageType").getAsString();
+
+            switch (type) {
+                case "LOAD_GAME" -> {
+                    GameData gameData = gson.fromJson(json.get("game"), GameData.class);
+                    if (gameData != null) {
+                        ui.updateLatestGameData(gameData);
+                        char[][] boardChars = ui.convertBoardToCharArray(gameData.game().getBoard());
+                        ChessBoardDrawer.drawBoard(boardChars, ui.fromWhitePerspective);
+                    } else {
+                        System.err.println("LOAD_GAME message missing game data.");
+                    }
+                }
+                case "BOARD_UPDATE" -> {
+                    GameData gameData = gson.fromJson(json.get("game"), GameData.class);
+                    if (gameData != null) {
+                        ui.updateLatestGameData(gameData);
+                        char[][] boardChars = ui.convertBoardToCharArray(gameData.game().getBoard());
+                        ChessBoardDrawer.drawBoard(boardChars, ui.fromWhitePerspective);
+                    } else {
+                        System.err.println("BOARD_UPDATE message missing game data.");
+                    }
+                }
+                case "ERROR" -> {
+                    System.err.println("Server error: " + json.get("errorMessage").getAsString());
+                }
+                case "NOTIFICATION" -> {
+                    System.out.println("Server notification: " + json.get("message").getAsString());
+                }
+                default -> {
+                    System.err.println("Unknown server message type: " + type);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to parse server message: " + e.getMessage());
+            e.printStackTrace();
         }
     }
-
 
 
     public void send(String message) {
@@ -73,6 +106,16 @@ public class ChessWebSocketCLIENT {
         } catch (Exception e) {
             System.err.println("Error closing WebSocket: " + e.getMessage());
         }
+    }
+
+    public void makeLeave(String authToken, int gameID) throws Exception {
+        Gson gson = new Gson();
+        JsonObject message = new JsonObject();
+        message.addProperty("commandType", "LEAVE");
+        message.addProperty("authToken", authToken);
+        message.addProperty("gameID", gameID);
+        send(gson.toJson(message));
+
     }
 
     public void makeResign(String authToken, int gameId) throws Exception {
@@ -110,5 +153,12 @@ public class ChessWebSocketCLIENT {
         send(gson.toJson(message));
     }
 
-
+    public void sendConnect(String authToken, int gameId) {
+        Gson gson = new Gson();
+        JsonObject message = new JsonObject();
+        message.addProperty("commandType", "CONNECT");
+        message.addProperty("authToken", authToken);
+        message.addProperty("gameID", gameId);
+        send(gson.toJson(message));
+    }
 }

@@ -237,7 +237,6 @@ public class ServerFacade {
 
         try (InputStreamReader reader = new InputStreamReader(responseStream)) {
             if (respCode == 200) {
-                // Assuming server returns updated board state as char[][]
                 return gson.fromJson(reader, char[][].class);
             } else {
                 throw new IOException("Make Move Failed");
@@ -246,10 +245,7 @@ public class ServerFacade {
     }
 
     public ChessGame convertGameDataToChessGame(GameData gameData) {
-        // Minimal example conversion. This must be adjusted based on actual GameData and ChessGame classes.
         ChessGame game = new ChessGame();
-        // Assume gameData contains board info, etc. This needs proper implementation.
-        // For now, just return empty game
         return game;
     }
 

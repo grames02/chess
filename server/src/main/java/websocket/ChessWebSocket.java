@@ -22,93 +22,68 @@ import java.util.Map;
 public class ChessWebSocket {
     private Gson gson = new Gson();
     private final DataAccess dataAccess = new MySqlDataAccess();
-
-    // Map of gameID to sessions connected to that game
     private static final Map<Integer, Set<Session>> GAME_SESSIONS = new ConcurrentHashMap<>();
-
-    // Map session to username (to identify who is who)
     private static final Map<Session, String> SESSION_USERNAMES = new ConcurrentHashMap<>();
 
     @OnWebSocketMessage
     public void onMessage(Session session, String message) throws Exception {
-        System.out.printf("Received: %s", message);
+        System.out.printf("Received: %s%n", message);
         try {
             UserGameCommand gameCommand = gson.fromJson(message, UserGameCommand.class);
-
             if (gameCommand.getCommandType().equals(UserGameCommand.CommandType.CONNECT)) {
                 int gameId = gameCommand.getGameID();
                 String authToken = gameCommand.getAuthToken();
                 AuthData auth = dataAccess.getAuth(authToken);
-
                 if (auth == null) {
                     ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "ERROR. Invalid authToken.");
                     session.getRemote().sendString(gson.toJson(error));
                     return;
                 }
-
                 GameData fullGame = dataAccess.getGame(gameId);
                 if (fullGame == null) {
                     ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "ERROR. Invalid game.");
                     session.getRemote().sendString(gson.toJson(error));
                     return;
                 }
-
-                // Add session to the GAME_SESSIONS map
                 GAME_SESSIONS.computeIfAbsent(gameId, k -> new CopyOnWriteArraySet<>()).add(session);
-
-                // Save username associated with session for notifications
                 SESSION_USERNAMES.put(session, auth.username());
-
                 ServerMessage loadGame = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, fullGame);
-
                 session.getRemote().sendString(gson.toJson(loadGame));
-
-                // Notify other sessions in the same game that this player joined
                 ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
                         auth.username() + " has joined the game.");
-
-                for (Session s : GAME_SESSIONS.get(gameId)) {
-                    if (!s.equals(session) && s.isOpen()) {
-                        s.getRemote().sendString(gson.toJson(notification));
+                Set<Session> sessions = GAME_SESSIONS.get(gameId);
+                if (sessions != null) {
+                    for (Session s : sessions) {
+                        if (!s.equals(session) && s.isOpen()) {
+                            s.getRemote().sendString(gson.toJson(notification));
+                        }
                     }
                 }
-
             }
 
             else if (gameCommand.getCommandType().equals(UserGameCommand.CommandType.LEAVE)) {
                 int gameId = gameCommand.getGameID();
                 String authToken = gameCommand.getAuthToken();
                 AuthData auth = dataAccess.getAuth(authToken);
-
                 if (auth == null) {
                     ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "ERROR. Invalid authToken.");
                     session.getRemote().sendString(gson.toJson(error));
                     return;
                 }
-
                 GameData fullGame = dataAccess.getGame(gameId);
                 if (fullGame == null) {
                     ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "ERROR. Invalid game.");
                     session.getRemote().sendString(gson.toJson(error));
                     return;
                 }
-
                 String username = auth.username();
                 GameData updatedGame = fullGame;
-
                 if (username.equals(fullGame.whiteUsername())) {
                     updatedGame = fullGame.withWhiteUsername(null);
                 } else if (username.equals(fullGame.blackUsername())) {
                     updatedGame = fullGame.withBlackUsername(null);
                 }
-
-                // Update game in DB
                 dataAccess.updateGame(updatedGame);
-
-                // Update in-memory map if you keep a cache (optional)
-                // For example, replace fullGame with updatedGame in your in-memory structure
-
-                // Remove session from GAME_SESSIONS and sessionUsernames maps
                 Set<Session> sessions = GAME_SESSIONS.get(gameId);
                 if (sessions != null) {
                     sessions.remove(session);
@@ -117,8 +92,6 @@ public class ChessWebSocket {
                     }
                 }
                 SESSION_USERNAMES.remove(session);
-
-                // Notify remaining sessions except leaving one
                 if (sessions != null) {
                     ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
                             username + " has left the game.");
@@ -129,7 +102,6 @@ public class ChessWebSocket {
                     }
                 }
             }
-
 
             else if (gameCommand.getCommandType().equals(UserGameCommand.CommandType.MAKE_MOVE)) {
                 int gameId = gameCommand.getGameID();
@@ -150,7 +122,6 @@ public class ChessWebSocket {
                 }
 
                 ChessGame game = fullGame.game();
-
                 String currentTurn = game.getTeamTurn().name();
 
                 String playerTeam;
@@ -171,7 +142,6 @@ public class ChessWebSocket {
                 }
 
                 ChessMove move = gameCommand.getMove();
-
                 var validMoves = game.validMoves(move.getStartPosition());
                 if (!validMoves.contains(move)) {
                     ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "ERROR. Invalid move.");
@@ -182,30 +152,36 @@ public class ChessWebSocket {
                 try {
                     game.makeMove(move);
                 } catch (InvalidMoveException e) {
-                    // *** Send an ERROR message back here ***
                     ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "ERROR. " + e.getMessage());
                     session.getRemote().sendString(gson.toJson(error));
                     return;
                 }
-
                 dataAccess.updateGame(fullGame);
-
-                ServerMessage loadGame = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, fullGame);
-
-                for (Session s : GAME_SESSIONS.get(gameId)) {
-                    if (s.isOpen()) {
-                        s.getRemote().sendString(gson.toJson(loadGame));
+                GameData updatedGame = dataAccess.getGame(gameId);
+                if (updatedGame == null) {
+                    ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "ERROR. Failed to fetch updated game.");
+                    session.getRemote().sendString(gson.toJson(error));
+                    return;
+                }
+                ServerMessage loadGame = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, updatedGame);
+                Set<Session> sessionsForGame = GAME_SESSIONS.get(gameId);
+                if (sessionsForGame != null) {
+                    for (Session s : sessionsForGame) {
+                        if (s.isOpen()) {
+                            s.getRemote().sendString(gson.toJson(loadGame));
+                        }
                     }
                 }
                 ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
                         auth.username() + " made a move.");
-                for (Session s : GAME_SESSIONS.get(gameId)) {
-                    if (!s.equals(session) && s.isOpen()) {
-                        s.getRemote().sendString(gson.toJson(notification));
+                if (sessionsForGame != null) {
+                    for (Session s : sessionsForGame) {
+                        if (!s.equals(session) && s.isOpen()) {
+                            s.getRemote().sendString(gson.toJson(notification));
+                        }
                     }
                 }
             }
-
 
             else if (gameCommand.getCommandType().equals(UserGameCommand.CommandType.RESIGN)) {
                 int gameId = gameCommand.getGameID();
@@ -227,7 +203,6 @@ public class ChessWebSocket {
 
                 ChessGame game = fullGame.game();
 
-                // Determine the player's team color by username
                 String playerTeam;
                 if (auth.username().equals(fullGame.whiteUsername())) {
                     playerTeam = "WHITE";
@@ -238,6 +213,7 @@ public class ChessWebSocket {
                     session.getRemote().sendString(gson.toJson(error));
                     return;
                 }
+
                 if (game.isOver()) {
                     ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR,
                             "ERROR. Game is already over; cannot resign again.");
@@ -245,34 +221,40 @@ public class ChessWebSocket {
                     return;
                 }
 
-                // Mark the game as resigned and over (you'll need to add methods or flags for this in your ChessGame/GameData classes)
-                game.resign(ChessGame.TeamColor.valueOf(playerTeam)); // example method — implement in your ChessGame model
-                game.getResignedPlayer(true);              // example method — implement in your ChessGame model
-
-                // Update the data in your database
+                game.resign(ChessGame.TeamColor.valueOf(playerTeam));
                 dataAccess.updateGame(fullGame);
+                GameData updatedGame = dataAccess.getGame(gameId);
+                if (updatedGame == null) {
+                    ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "ERROR. Failed to fetch updated game.");
+                    session.getRemote().sendString(gson.toJson(error));
+                    return;
+                }
+                ServerMessage loadGame = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, updatedGame);
+                Set<Session> sessionsForGame = GAME_SESSIONS.get(gameId);
+                if (sessionsForGame != null) {
+                    for (Session s : sessionsForGame) {
+                        if (s.isOpen()) {
+                            s.getRemote().sendString(gson.toJson(loadGame));
+                        }
+                    }
+                }
 
-                // Notify all sessions connected to this game about the resignation
                 String notificationText = auth.username() + " (" + playerTeam + ") has resigned. Game over.";
-
                 ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, notificationText);
 
-                for (Session s : GAME_SESSIONS.get(gameId)) {
-                    if (s.isOpen()) {
-                        s.getRemote().sendString(gson.toJson(notification));
+                if (sessionsForGame != null) {
+                    for (Session s : sessionsForGame) {
+                        if (s.isOpen()) {
+                            s.getRemote().sendString(gson.toJson(notification));
+                        }
                     }
                 }
             }
 
-            else {
-                // That's no good.
-
-            }
         } catch (Exception e) {
-            // Print error here.
-            System.out.println("Error Processing WebSocket" + e.getMessage());
+            System.out.println("Error Processing WebSocket: " + e.getMessage());
+            e.printStackTrace();
         }
-
     }
 
     @OnWebSocketClose
@@ -280,5 +262,4 @@ public class ChessWebSocket {
         SESSION_USERNAMES.remove(session);
         GAME_SESSIONS.values().forEach(sessions -> sessions.remove(session));
     }
-
 }

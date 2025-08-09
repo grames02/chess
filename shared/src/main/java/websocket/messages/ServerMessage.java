@@ -18,6 +18,10 @@ public class ServerMessage {
     private String message;
     private char[][] board;
 
+    public char[][] getBoard() {
+        return board;
+    }
+
     public enum ServerMessageType {
         LOAD_GAME,
         ERROR,
