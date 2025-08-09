@@ -43,19 +43,11 @@ public class ChessWebSocketCLIENT {
         ServerMessage baseMessage = gson.fromJson(message, ServerMessage.class);
         if (baseMessage.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
             GameData gameData = gson.fromJson(message, GameData.class);
-            ui.updateBoardDisplay(gameData);
+            ui.updateLatestGameData(gameData);
         }
     }
 
-    @OnClose
-    public void onClose(Session session, CloseReason closeReason) {
-        System.out.println("WebSocket closed: " + closeReason);
-    }
 
-    @OnError
-    public void onError(Session session, Throwable throwable) {
-        System.err.println("WebSocket error: " + throwable.getMessage());
-    }
 
     public void send(String message) {
         try {

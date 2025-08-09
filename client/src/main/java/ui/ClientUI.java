@@ -4,7 +4,6 @@ import chess.*;
 import model.AuthData;
 import model.GameData;
 import model.ListGamesResponse;
-import websocket.commands.UserGameCommand;
 
 import java.util.List;
 import java.util.Locale;
@@ -21,6 +20,7 @@ public class ClientUI {
     private ChessWebSocketCLIENT webSocketCLIENT;
     private boolean fromWhitePerspective;
     private int currentGameId;
+    private GameData latestGameData;
 
     public ClientUI(ServerFacade serverFacade) {
         this.serverFacade = serverFacade;
@@ -37,7 +37,7 @@ public class ClientUI {
         }
     }
 
-    private void gameplayMenu() {
+    private void gameplayMenu(int gameNumber) {
         while (gameplayMode) {
             System.out.print("\nTime to play Chess! Please enter one of the options below:\n" +
                     "\nMAKE MOVE" + "\nREDRAW CHESS BOARD" + "\nHIGHLIGHT LEGAL MOVES" +
@@ -56,11 +56,14 @@ public class ClientUI {
                 }
                 ChessPosition start = ChessPosition.positionInterpreter(parts[0]);
                 ChessPosition end = ChessPosition.positionInterpreter(parts[1]);
+                assignChessList();
+                int gameID = currentGamesList.get(gameNumber - 1).gameID();
 
                 try {
                     ChessMove chessMove = new ChessMove(start, end, null);
-                    webSocketCLIENT.makeMove(auth.authToken(), currentGameId, chessMove);
+                    webSocketCLIENT.makeMove(auth.authToken(), gameID, chessMove);
                     // Now wait for server response to redraw board in onMessage handler
+                    updateBoardDisplay(latestGameData);
 
                 } catch (Exception e) {
                     System.out.print("Move failed: " + e.getMessage());
@@ -69,6 +72,8 @@ public class ClientUI {
 
             else if (selection.toLowerCase(Locale.ROOT).equals("redraw chess board")) {
                 // Redraw current chess board - you can implement as needed
+
+                updateBoardDisplay(latestGameData);
             }
 
             else if (selection.toLowerCase(Locale.ROOT).equals("highlight legal moves")) {
@@ -134,17 +139,15 @@ public class ClientUI {
                 }
 
                 int gameNumber = Integer.parseInt(gameJoinParts[1]);
-                currentGameId = currentGamesList.get(gameNumber - 1).gameID();
-
-                joinGameFunction(playerColor, currentGameId);
 
                 try {
+                    joinGameFunction(playerColor, gameNumber);
                     String serverUrl = "ws://localhost:8080/ws";
                     webSocketCLIENT = new ChessWebSocketCLIENT(serverUrl, this);
                     System.out.print("Successfully connected to web socket.");
                     gameplayMode = true;
                     this.fromWhitePerspective = playerColor.equalsIgnoreCase("white");
-                    gameplayMenu();
+                    gameplayMenu(gameNumber);
                 } catch (Exception e) {
                     System.err.print("Failed to connect to WebSocket " + e.getMessage());
                 }
@@ -300,15 +303,16 @@ public class ClientUI {
         }
     }
 
-    private void joinGameFunction(String playerColor, int gameId) {
-        try {
-            ChessGame game = serverFacade.joinGame(auth.authToken(), playerColor, gameId);
+    private void joinGameFunction(String playerColor, int gameNumber) throws Exception {
+            ChessGame game = serverFacade.joinGame(auth.authToken(), playerColor, gameNumber);
             char[][] boardChars = convertBoardToCharArray(game.getBoard());
             fromWhitePerspective = playerColor.equalsIgnoreCase("white");
             ChessBoardDrawer.drawBoard(boardChars, fromWhitePerspective);
-        } catch (Exception e) {
-            System.out.print("Joining Game Failed " + e.getMessage());
-        }
+    }
+
+    public void updateLatestGameData(GameData gameData) {
+        this.latestGameData = gameData;
+        updateBoardDisplay(gameData);
     }
 
     public void updateBoardDisplay(GameData gameData) {
